@@ -181,7 +181,8 @@ abstract class Field
 
     public function isSearch()
     {
-        return $this->isSearchable() && $this->getSearch();
+        return $this->isSearchable()
+            && $this->getSearch() != '';
     }
 
     /**

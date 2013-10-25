@@ -94,7 +94,13 @@ class BaseTestCase extends \PHPUnit_Framework_TestCase
         $p  = new Entity\Product;
         $p->setName('Laptop')
             ->setPrice(1000)
-            ->setDescription('New laptop');
+            ->setDescription('New laptop')
+            ->setEnabled(true);
+        $p2  = new Entity\Product;
+        $p2->setName('PC')
+            ->setPrice(600)
+            ->setDescription('Old good PC')
+            ->setEnabled(false);
         $f  = new Entity\Feature;
         $f->setName('CPU I7 Generation')
             ->setProduct($p);
@@ -104,10 +110,16 @@ class BaseTestCase extends \PHPUnit_Framework_TestCase
         $f2 = new Entity\Feature;
         $f2->setName('SLI graphic card')
             ->setProduct($p);
+
+        $f3 = new Entity\Feature;
+        $f3->setName('G-Force graphic card')
+            ->setProduct($p2);
         $em->persist($p);
+        $em->persist($p2);
         $em->persist($f);
         $em->persist($f1);
         $em->persist($f2);
+        $em->persist($f3);
         $em->flush();
     }
 

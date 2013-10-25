@@ -234,6 +234,9 @@ class Datatable extends Field
      */
     public function select(QueryBuilder $qb)
     {
+        // TODO: fetch primary key name from metadata
+        $qb->select($this->getEntity()->getAlias() . '.id');
+
         foreach ($this->fields as $field) {
             $field->select($qb);
         }

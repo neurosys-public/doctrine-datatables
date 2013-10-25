@@ -29,6 +29,11 @@ class Product
     protected $price;
 
     /**
+     * @Column(type="boolean")
+     */
+    protected $enabled;
+
+    /**
      * @Column(type="text")
      */
     protected $description;
@@ -95,6 +100,17 @@ class Product
     public function setFeatures($features)
     {
         $this->features = $features;
+        return $this;
+    }
+
+    public function getEnabled()
+    {
+        return $this->enabled;
+    }
+
+    public function setEnabled($enabled)
+    {
+        $this->enabled = $enabled;
         return $this;
     }
 

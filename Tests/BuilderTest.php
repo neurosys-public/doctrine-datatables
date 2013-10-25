@@ -27,9 +27,8 @@ class BuilderTest extends BaseTestCase
             ->getResponseArray();
 
         $this->assertEquals(2, count($response['aaData']));
-        $this->assertEquals(3, $response['iTotalRecords']);
-        $this->assertEquals(3, $response['iTotalRecords']);
-        $this->assertEquals(3, $response['iTotalDisplayRecords']);
+        $this->assertEquals(4, $response['iTotalRecords']);
+        $this->assertEquals(4, $response['iTotalDisplayRecords']);
     }
 
     public function testRangeField()
@@ -52,6 +51,55 @@ class BuilderTest extends BaseTestCase
                 'price' => '1000',
             ),
         ), $result);
+    }
+
+    public function testFilterByNonExistentText()
+    {
+        $request  = $this->createSearchRequest(array(), array('name', 'product.price'), array('no result please'));
+        $builder  = new DatatableBuilder($this->_em, $request, $this->registry);
+
+        $builder
+            ->from('\\NeuroSYS\\DoctrineDatatables\\Tests\\Entity\\Feature', 'f')
+            ->add("text")
+            ->add("number")
+        ;
+
+        $result = $builder->getDatatable()
+            ->getResult();
+
+        $this->assertEquals(0, count($result));
+    }
+
+    public function testBooleanBield()
+    {
+        $request  = $this->createSearchRequest(array(), array('name', 'product.enabled'), array('', '1'));
+        $builder  = new DatatableBuilder($this->_em, $request, $this->registry);
+
+        $builder
+            ->from('\\NeuroSYS\\DoctrineDatatables\\Tests\\Entity\\Feature', 'f')
+            ->add("text")
+            ->add("boolean")
+        ;
+
+        $result = $builder->getDatatable()
+            ->getResult();
+
+        $this->assertEquals(3, count($result));
+
+        $request  = $this->createSearchRequest(array(), array('name', 'product.enabled'), array('', '0'));
+        $builder  = new DatatableBuilder($this->_em, $request, $this->registry);
+
+        $builder
+            ->from('\\NeuroSYS\\DoctrineDatatables\\Tests\\Entity\\Feature', 'f')
+            ->add("text")
+            ->add("boolean")
+        ;
+        //echo $builder->getDatatable()->createQueryBuilder()->getQuery()->getSQL();
+
+        $result = $builder->getDatatable()
+            ->getResult();
+
+        $this->assertEquals(1, count($result));
     }
 
     public function testChoiceField()
