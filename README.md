@@ -1,4 +1,4 @@
-Doctrine Datatables library  [![Build Status](https://travis-ci.org/neurosys-pl/doctrine-datatables.png)](https://travis-ci.org/neurosys-pl/doctrine-datatables)
+Doctrine Datatables library [![Build Status](https://travis-ci.org/neurosys-pl/doctrine-datatables.png)](https://travis-ci.org/neurosys-pl/doctrine-datatables)
 ===========================
 
 Doctrine Datatables library provides a Doctrine2 server side processing for [Datatables](http://datatables.net/).
