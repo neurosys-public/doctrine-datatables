@@ -1,8 +1,9 @@
 Doctrine Datatables library
 =====================================
 
-Doctrine Datatables library provides a Doctrine2 wrapper around [Datatables](http://datatables.net/).
-This library was created because existing library lack of flexibility around column types and column filtering.
+Doctrine Datatables library provides a Doctrine2 server side processing for [Datatables](http://datatables.net/).
+
+This library was created because existing libraries lack of flexibility around field types and field filtering.
 
 Installation
 ------------
