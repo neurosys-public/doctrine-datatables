@@ -74,7 +74,7 @@ class DatatableBuilder
         return $default;
     }
 
-    public function multi($name)
+    public function with($name)
     {
         $this->parent = new MultiField($name);
 

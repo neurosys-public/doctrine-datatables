@@ -81,7 +81,7 @@ class BuilderTest extends BaseTestCase
 
         $builder
             ->from('\\NeuroSYS\\DoctrineDatatables\\Tests\\Entity\\Feature')
-            ->multi('fullName')
+            ->with('fullName')
                 ->add('text', 'product.name')
                 ->add('text', 'name')
             ->end()
