@@ -81,6 +81,8 @@ class DatatableBuilder
         $aliases            = $qb->getRootAliases();
         $this->entity       = new Entity($entities[0], $aliases[0], $aliases[0]);
         $this->queryBuilder = $qb;
+
+        return $this;
     }
 
     /**
