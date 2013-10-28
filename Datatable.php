@@ -40,9 +40,9 @@ class Datatable extends Field
     private $request;
 
     /**
-     * @var Paginator
+     * @var QueryBuilder
      */
-    private $paginator;
+    private $queryBuilder;
 
     /**
      * Constructor
@@ -96,6 +96,10 @@ class Datatable extends Field
         return $this;
     }
 
+    /**
+     * @param $maxResults
+     * @return $this
+     */
     public function setMaxResults($maxResults)
     {
         $this->maxResults = $maxResults;
@@ -103,11 +107,18 @@ class Datatable extends Field
         return $this;
     }
 
+    /**
+     * @return int
+     */
     public function getMaxResults()
     {
         return $this->maxResults;
     }
 
+    /**
+     * @param $firstResult
+     * @return $this
+     */
     public function setFirstResult($firstResult)
     {
         $this->firstResult = $firstResult;
@@ -115,17 +126,42 @@ class Datatable extends Field
         return $this;
     }
 
+    /**
+     * @return int
+     */
     public function getFirstResult()
     {
         return $this->firstResult;
     }
 
     /**
+     * @param QueryBuilder $qb
+     * @return $this
+     */
+    public function setQueryBuilder(QueryBuilder $qb)
+    {
+        $this->queryBuilder = $qb;
+
+        return $this;
+    }
+
+    /**
+     * @return QueryBuilder Original query builder clone
+     */
+    public function getQueryBuilder()
+    {
+        if (!$this->queryBuilder) {
+            $this->queryBuilder = $this->em->createQueryBuilder();
+        }
+        return clone $this->queryBuilder;
+    }
+
+    /**
      * @return QueryBuilder
      */
-    public function createQueryBuilder()
+    protected function getResultQueryBuilder()
     {
-        $qb = $this->em->createQueryBuilder();
+        $qb = $this->getQueryBuilder();
 
         $this
             ->select($qb)
@@ -141,9 +177,10 @@ class Datatable extends Field
 
     public function getResult()
     {
-        $results = $this->createQueryBuilder()->getQuery()->getResult();
+        $results = $this->getResultQueryBuilder()->getQuery()->getResult();
         foreach ($results as $i => $result) {
-            $row = array();
+            $row = array('id' => $result['id']);
+
             foreach ($this->fields as $field) {
                 $row[$field->getName()] = $field->format($result);
             }
@@ -159,7 +196,7 @@ class Datatable extends Field
     {
         $rootEntityIdentifier = 'id'; // FIXME: fetch it from Metadata
 
-        $qb = $this->em->createQueryBuilder()
+        $qb = $this->getQueryBuilder()
             ->select('COUNT(' . $this->getEntity()->getAlias() . '.' . $rootEntityIdentifier . ')');
         $this
             ->from($qb)
@@ -175,7 +212,7 @@ class Datatable extends Field
     public function getCountFilteredResults()
     {
         $rootEntityIdentifier = 'id'; // FIXME: fetch it from Metadata
-        $qb = $this->em->createQueryBuilder()
+        $qb = $this->getQueryBuilder()
             ->select('COUNT(DISTINCT ' . $this->getEntity()->getAlias() . '.' . $rootEntityIdentifier . ')');
 
         $this
@@ -205,7 +242,9 @@ class Datatable extends Field
      */
     public function from(QueryBuilder $qb)
     {
-        $qb->from($this->getEntity()->getClassName(), $this->getEntity()->getAlias());
+        if (!$qb->getRootEntities()) {
+            $qb->from($this->getEntity()->getClassName(), $this->getEntity()->getAlias());
+        }
 
         return $this;
     }
@@ -235,7 +274,7 @@ class Datatable extends Field
     public function select(QueryBuilder $qb)
     {
         // TODO: fetch primary key name from metadata
-        $qb->select($this->getEntity()->getAlias() . '.id');
+        $qb->addSelect($this->getEntity()->getAlias() . '.id');
 
         foreach ($this->fields as $field) {
             $field->select($qb);

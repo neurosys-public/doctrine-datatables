@@ -72,6 +72,14 @@ $builder
     ;
 ```
 
+Custom query builder example:
+```php
+$responseArray = $builder
+    ->setQueryBuilder($customQueryBuilder)
+    ->getDatatable()
+    ->getResponseArray();
+```
+
 Available field types
 ---------------------
 

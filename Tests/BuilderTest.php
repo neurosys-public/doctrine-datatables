@@ -12,7 +12,7 @@ use NeuroSYS\DoctrineDatatables\FieldBuilder;
 
 class BuilderTest extends BaseTestCase
 {
-    public function testTextFieldWithLimit()
+    public function testBasics()
     {
         $request  = $this->createSearchRequest(array('iDisplayLength' => 2), array('name', 'product.price'));
         $builder  = new DatatableBuilder($this->_em, $request, $this->registry);
@@ -29,6 +29,8 @@ class BuilderTest extends BaseTestCase
         $this->assertEquals(2, count($response['aaData']));
         $this->assertEquals(4, $response['iTotalRecords']);
         $this->assertEquals(4, $response['iTotalDisplayRecords']);
+
+        $this->assertArrayHasKey('id', $response['aaData'][0], 'Result contains a primary key');
     }
 
     public function testRangeField()
@@ -47,6 +49,7 @@ class BuilderTest extends BaseTestCase
 
         $this->assertEquals(array(
             array (
+                'id' => 1,
                 'name' => 'CPU I7 Generation',
                 'price' => '1000',
             ),
@@ -94,7 +97,6 @@ class BuilderTest extends BaseTestCase
             ->add("text")
             ->add("boolean")
         ;
-        //echo $builder->getDatatable()->createQueryBuilder()->getQuery()->getSQL();
 
         $result = $builder->getDatatable()
             ->getResult();
@@ -138,10 +140,12 @@ class BuilderTest extends BaseTestCase
 
         $results = $builder->getDatatable()
             ->getResult();
-        $results = array_map('current', $results);
+        foreach ($results as $i => $result) {
+            $results[$i] = $result['fullName'];
+        }
 
         // fetch real results
-        $sorted = $this->_em->getConnection()->query("SELECT p.name as p_name, f.name as f_name FROM features f LEFT JOIN products p ON p.id = f.product_id ORDER BY p.name DESC, f.name DESC")->fetchAll();
+        $sorted = $this->_em->getConnection()->query("SELECT f.id, p.name as p_name, f.name as f_name FROM features f LEFT JOIN products p ON p.id = f.product_id ORDER BY p.name DESC, f.name DESC")->fetchAll();
         foreach ($sorted as $i => $row) {
             $sorted[$i] = $row['p_name'] . ' ' . $row['f_name'];
         }
@@ -162,7 +166,28 @@ class BuilderTest extends BaseTestCase
             ->getResult();
 
         // fetch real results
-        $expected = $this->_em->getConnection()->query("SELECT p.name, p.price FROM products p ORDER BY p.name ASC")->fetchAll();
+        $expected = $this->_em->getConnection()->query("SELECT p.id, p.name, p.price FROM products p ORDER BY p.name ASC")->fetchAll();
+        $this->assertEquals($expected, $results);
+    }
+
+    public function testCustomQueryBuilder()
+    {
+        $request  = $this->createSearchRequest(array(), array('name', 'enabled'), array());
+        $builder  = new DatatableBuilder($this->_em, $request, $this->registry);
+
+        $qb = $this->_em->createQueryBuilder()
+            ->from('\\NeuroSYS\\DoctrineDatatables\\Tests\\Entity\\Product', 'p')
+            ->where('p.enabled = 1')
+        ;
+        $builder
+            ->setQueryBuilder($qb)
+        ;
+
+        $results = $builder->getDatatable()
+            ->getResult();
+
+        // fetch real results
+        $expected = $this->_em->getConnection()->query("SELECT p.id, p.name, p.enabled FROM products p WHERE enabled = 1 ORDER BY p.name ASC")->fetchAll();
         $this->assertEquals($expected, $results);
     }
 }

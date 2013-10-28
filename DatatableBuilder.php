@@ -2,7 +2,9 @@
 namespace NeuroSYS\DoctrineDatatables;
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\QueryBuilder;
 use NeuroSYS\DoctrineDatatables\Field\Entity;
+use NeuroSYS\DoctrineDatatables\Field\Field;
 use NeuroSYS\DoctrineDatatables\Field\MultiField;
 use Symfony\Component\DependencyInjection\ContainerAware;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -35,6 +37,11 @@ class DatatableBuilder
      */
     private $registry;
 
+    /**
+     * @var QueryBuilder
+     */
+    private $queryBuilder;
+
     public function __construct(EntityManager $em, array $request, FieldRegistry $registry = null)
     {
         $this->em       = $em;
@@ -53,8 +60,27 @@ class DatatableBuilder
     public function from($className, $alias = null)
     {
         $this->entity = new Entity($className, $alias);
+        $this->queryBuilder = $this->em->createQueryBuilder()
+            ->from($className, $this->entity->getAlias())
+        ;
 
         return $this;
+    }
+
+    /**
+     * @param QueryBuilder $qb QueryBuilder instance
+     * @throws \Exception
+     */
+    public function setQueryBuilder(QueryBuilder $qb)
+    {
+        $entities = $qb->getRootEntities();
+        if (empty($entities)) {
+            throw new \Exception("You have to add a FROM Part to QueryBuilder");
+        }
+
+        $aliases            = $qb->getRootAliases();
+        $this->entity       = new Entity($entities[0], $aliases[0], $aliases[0]);
+        $this->queryBuilder = $qb;
     }
 
     /**
@@ -141,6 +167,7 @@ class DatatableBuilder
 
         $datatable = new Datatable($this->em, $this->request);
         $datatable
+            ->setQueryBuilder($this->queryBuilder)
             ->setEntity($this->entity)
             ->setFields($this->fields)
         ;
