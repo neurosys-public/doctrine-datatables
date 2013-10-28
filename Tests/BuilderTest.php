@@ -130,8 +130,8 @@ class BuilderTest extends BaseTestCase
         $builder
             ->from('\\NeuroSYS\\DoctrineDatatables\\Tests\\Entity\\Feature')
             ->with('fullName')
-                ->add('text', 'product.name')
-                ->add('text', 'name')
+            ->add('text', 'product.name')
+            ->add('text', 'name')
             ->end()
             ->add("number")
         ;
@@ -147,5 +147,22 @@ class BuilderTest extends BaseTestCase
         }
 
         $this->assertEquals($sorted, $results);
+    }
+
+    public function testAutoResolveFields()
+    {
+        $request  = $this->createSearchRequest(array(), array('name', 'price'), array());
+        $builder  = new DatatableBuilder($this->_em, $request, $this->registry);
+
+        $builder
+            ->from('\\NeuroSYS\\DoctrineDatatables\\Tests\\Entity\\Product')
+        ;
+
+        $results = $builder->getDatatable()
+            ->getResult();
+
+        // fetch real results
+        $expected = $this->_em->getConnection()->query("SELECT p.name, p.price FROM products p ORDER BY p.name ASC")->fetchAll();
+        $this->assertEquals($expected, $results);
     }
 }

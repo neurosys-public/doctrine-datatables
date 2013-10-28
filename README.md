@@ -33,7 +33,6 @@ It does not support global search (yet)
 
 Usage
 -----
-
 ```php
 $builder = new DatatableBuilder($entityManager, $_GET);
 $builder
@@ -50,6 +49,13 @@ $response = $builder->getDatatable()
 // now you can simply return a response
 // header ('Content-Type', 'application/json');
 // echo json_encode($response);
+```
+
+If fields are simple texts than there is no need of adding any field to a datatable builder, fields will be automatically generated from mDataProp_x
+```php
+$builder
+    ->from('Foo\Bar\Entity\Sample')
+    ;
 ```
 
 Composed fields example:

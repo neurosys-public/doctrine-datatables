@@ -135,11 +135,22 @@ class DatatableBuilder
      */
     public function getDatatable()
     {
+        if (empty($this->fields)) {
+            $this->autoResolveFields();
+        }
+
         $datatable = new Datatable($this->em, $this->request);
         $datatable
             ->setEntity($this->entity)
             ->setFields($this->fields)
         ;
         return $datatable;
+    }
+
+    protected function autoResolveFields()
+    {
+        for ($i = 0; $i < $this->getParameter('iColumns'); $i++) {
+            $this->add('text');
+        }
     }
 }

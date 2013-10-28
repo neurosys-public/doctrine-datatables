@@ -31,7 +31,7 @@ class BaseTestCase extends \PHPUnit_Framework_TestCase
     {
         $request = array(
             'sEcho' => '1',
-            'iColumns' => '4',
+            'iColumns' => count($props),
             'sColumns' => '',
             'iDisplayStart' => '0',
             'iDisplayLength' => '10',
