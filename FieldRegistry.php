@@ -34,25 +34,26 @@ class FieldRegistry
      * @return Field
      * @throws \Exception
      */
-    public function resolve($type, $name, Entity $root, $options = array())
+    public function resolve($type, $path, Entity $root, $options = array())
     {
         if (!array_key_exists($type, $this->types)) {
             throw new \Exception(sprintf("Field type '%s' does not exist!", $type));
         }
         $class = $this->types[$type];
 
-        $path = explode('.', $name);
-        $size = count($path);
+        $pathArr = explode('.', $path);
+        $size = count($pathArr);
 
         for ($i = 0; $i < $size; $i++) {
             $parent = isset($parent) ? $parent : $root;
             /**
              * @var Field $field
              */
-            if (isset($path[$i+1])) {
-                $field = $parent->getRelation($path[$i]);
+            if (isset($pathArr[$i+1])) {
+                $field = $parent->getRelation($pathArr[$i]);
             } else {
-                $field = new $class($path[$i], null, $options);
+                $field = new $class($pathArr[$i], null, $options);
+                $field->setPath($path);
             }
             $field->setParent($parent);
 

@@ -49,6 +49,12 @@ abstract class Field
     protected $sortDir = 'asc';
 
 
+    /**
+     * Field path
+     *
+     * @var string
+     */
+    protected $path;
 
     /**
      * Alias index used to generate alias for a field
@@ -194,6 +200,18 @@ abstract class Field
         $qb->setParameter($this->getName(), '%'.$this->getSearch().'%');
 
         return $qb->expr()->like($this->getFullName(), ':' . $this->getName());
+    }
+
+    public function getPath()
+    {
+        return $this->path ?: $this->getName();
+    }
+
+    public function setPath($path)
+    {
+        $this->path = $path;
+
+        return $this;
     }
 
     /**

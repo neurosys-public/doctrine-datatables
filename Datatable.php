@@ -182,7 +182,7 @@ class Datatable extends Field
             $row = array('id' => $result['id']);
 
             foreach ($this->fields as $field) {
-                $row[$field->getName()] = $field->format($result);
+                $row[$field->getPath()] = $field->format($result);
             }
             $results[$i] = $row;
         }
