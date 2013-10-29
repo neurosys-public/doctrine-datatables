@@ -179,12 +179,20 @@ class Datatable extends Field
     {
         $results = $this->getResultQueryBuilder()->getQuery()->getResult();
         foreach ($results as $i => $result) {
-            $row = array('id' => $result['id']);
+            $rootRow = array('id' => $result['id']);
+
 
             foreach ($this->fields as $field) {
-                $row[$field->getPath()] = $field->format($result);
+                $row = &$rootRow;
+                foreach ($field->getPath() as $name) {
+                    if (!isset($row[$name])) {
+                        $row[$name] = array();
+                    }
+                    $row = &$row[$name];
+                }
+                $row = $field->format($result);
             }
-            $results[$i] = $row;
+            $results[$i] = $rootRow;
         }
         return $results;
     }

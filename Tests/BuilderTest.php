@@ -51,7 +51,9 @@ class BuilderTest extends BaseTestCase
             array (
                 'id' => 1,
                 'name' => 'CPU I7 Generation',
-                'product.price' => '1000',
+                'product' => array(
+                    'price' => '1000',
+                ),
             ),
         ), $result);
     }

@@ -41,18 +41,18 @@ class FieldRegistry
         }
         $class = $this->types[$type];
 
-        $pathArr = explode('.', $path);
-        $size = count($pathArr);
+        $path = explode('.', $path);
+        $size = count($path);
 
         for ($i = 0; $i < $size; $i++) {
             $parent = isset($parent) ? $parent : $root;
             /**
              * @var Field $field
              */
-            if (isset($pathArr[$i+1])) {
-                $field = $parent->getRelation($pathArr[$i]);
+            if (isset($path[$i+1])) {
+                $field = $parent->getRelation($path[$i]);
             } else {
-                $field = new $class($pathArr[$i], null, $options);
+                $field = new $class($path[$i], null, $options);
                 $field->setPath($path);
             }
             $field->setParent($parent);

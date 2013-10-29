@@ -52,7 +52,7 @@ abstract class Field
     /**
      * Field path
      *
-     * @var string
+     * @var array
      */
     protected $path;
 
@@ -202,11 +202,18 @@ abstract class Field
         return $qb->expr()->like($this->getFullName(), ':' . $this->getName());
     }
 
+    /**
+     * @return array Field path
+     */
     public function getPath()
     {
-        return $this->path ?: $this->getName();
+        return $this->path ?: array($this->getName());
     }
 
+    /**
+     * @param $path
+     * @return $this
+     */
     public function setPath($path)
     {
         $this->path = $path;
