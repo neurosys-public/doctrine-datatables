@@ -38,12 +38,16 @@ class MultiField extends Field
      */
     public function filter(QueryBuilder $qb)
     {
-        $expr = $qb->expr()->orX();
-
+        // explode spaces so each field can be found separately
+        $searches = explode(' ', $this->getSearch());
+        $orx = $qb->expr()->orX();
         foreach ($this->fields as $field) {
-            $expr->add($field->filter($qb));
+            foreach ($searches as $i => $search) {
+                $qb->setParameter($field->getName().'_'.$i, ($i > 0 ? '%' : '') . trim($search) . '%');
+                $orx->add($qb->expr()->like($field->getFullName(), ':'.$field->getName().'_'.$i));
+            }
         }
-        return $expr;
+        return $orx;
     }
 
     public function select(QueryBuilder $qb)
@@ -62,10 +66,10 @@ class MultiField extends Field
         return implode(' ', $items); // TODO: make separator configurable
     }
 
-    public function order(QueryBuilder $qb)
+    public function order(QueryBuilder $qb, $dir = 'asc')
     {
         foreach ($this->fields as $field) {
-            $qb->addOrderBy($field->getFullName(), $field->getSortDir());
+            $qb->addOrderBy($field->getFullName(), $dir);
         }
     }
 } 

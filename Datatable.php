@@ -45,6 +45,11 @@ class Datatable extends Field
     private $queryBuilder;
 
     /**
+     * @var array
+     */
+    private $orders = array();
+
+    /**
      * Constructor
      *
      * @param EntityManager $em
@@ -92,6 +97,16 @@ class Datatable extends Field
     public function setFields(array $fields)
     {
         $this->fields = $fields;
+
+        return $this;
+    }
+
+    /**
+     * @param array[] $orders
+     */
+    public function setOrders(array $orders)
+    {
+        $this->orders = $orders;
 
         return $this;
     }
@@ -159,7 +174,7 @@ class Datatable extends Field
     /**
      * @return QueryBuilder
      */
-    protected function getResultQueryBuilder()
+    public function getResultQueryBuilder()
     {
         $qb = $this->getQueryBuilder();
 
@@ -316,12 +331,10 @@ class Datatable extends Field
         return $this;
     }
 
-    public function order(QueryBuilder $qb)
+    public function order(QueryBuilder $qb, $dir = 'asc')
     {
-        foreach ($this->fields as $field) {
-            if ($field->isSort()) {
-                $field->order($qb);
-            }
+        foreach ($this->orders as $order) {
+            $this->fields[$order['index']]->order($qb, $order['dir']);
         }
 
         return $this;

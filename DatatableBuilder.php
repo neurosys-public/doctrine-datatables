@@ -106,12 +106,9 @@ class DatatableBuilder
     {
         $this->parent = new MultiField($name);
 
-        // TODO: make it DRY @see self::add
         $index = count($this->fields);
-        if ($this->getParameter('iSortCol', 0, -1) == $index) {
-            $this->parent->setSort(true);
-            $this->parent->setSortDir($this->getParameter('sSortDir', $index));
-        }
+        $this->parent->setSearchable($this->getParameter('bSearchable', $index));
+        $this->parent->setSearch($this->getParameter('sSearch', $index, ''));
 
         return $this;
     }
@@ -141,12 +138,6 @@ class DatatableBuilder
         $field->setSearchable($this->getParameter('bSearchable', $index));
         $field->setSearch($this->getParameter('sSearch', $index, ''));
 
-        // FIXME: allow more than one column order
-        if ($this->getParameter('iSortCol', 0, -1) == $index) {
-            $field->setSort(true);
-            $field->setSortDir($this->getParameter('sSortDir', $index));
-        }
-
         if ($this->parent) {
             $this->parent->addField($field);
         } else {
@@ -166,12 +157,20 @@ class DatatableBuilder
         if (empty($this->fields)) {
             $this->autoResolveFields();
         }
+        $orders = array();
+        for ($i = 0; $i < $this->getParameter('iSortingCols'); $i++) {
+            $orders[] = array(
+                'index' => $this->getParameter('iSortCol', $i),
+                'dir'   => $this->getParameter('sSortDir', $i)
+            );
+        }
 
         $datatable = new Datatable($this->em, $this->request);
         $datatable
             ->setQueryBuilder($this->queryBuilder)
             ->setEntity($this->entity)
             ->setFields($this->fields)
+            ->setOrders($orders)
         ;
         return $datatable;
     }
@@ -182,4 +181,5 @@ class DatatableBuilder
             $this->add('text');
         }
     }
+
 }

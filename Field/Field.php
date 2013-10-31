@@ -35,21 +35,6 @@ abstract class Field
     protected $search;
 
     /**
-     * Is this field sortable and sorted
-     *
-     * @var bool
-     */
-    protected $sort = false;
-
-    /**
-     * Sort order for this column
-     *
-     * @var string
-     */
-    protected $sortDir = 'asc';
-
-
-    /**
      * Field path
      *
      * @var array
@@ -106,30 +91,6 @@ abstract class Field
     public function getSearch()
     {
         return $this->search;
-    }
-
-    public function setSort($sort)
-    {
-        $this->sort = (bool)$sort;
-
-        return $this;
-    }
-
-    public function isSort()
-    {
-        return $this->sort;
-    }
-
-    public function setSortDir($dir)
-    {
-        $this->sortDir = $dir;
-
-        return $this;
-    }
-
-    public function getSortDir()
-    {
-        return $this->sortDir;
     }
 
     public function getParent()
@@ -234,9 +195,9 @@ abstract class Field
      * @param QueryBuilder $qb
      * @return $this
      */
-    public function order(QueryBuilder $qb)
+    public function order(QueryBuilder $qb, $dir = 'asc')
     {
-        $qb->addOrderBy($this->getFullName(), $this->getSortDir());
+        $qb->addOrderBy($this->getFullName(), $dir);
     }
 
     public function join(QueryBuilder $qb)

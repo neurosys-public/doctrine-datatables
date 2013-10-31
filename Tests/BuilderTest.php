@@ -128,16 +128,16 @@ class BuilderTest extends BaseTestCase
 
     public function testMultiFieldWithSort()
     {
-        $request  = $this->createSearchRequest(array('sSortDir_0' => 'desc'), array('fullName', 'product.price'), array());
+        $request  = $this->createSearchRequest(array('sSortDir_0' => 'desc', 'iSortCol_0' => 1), array('product.price', 'fullName'), array('', 'Laptop'));
         $builder  = new DatatableBuilder($this->_em, $request, $this->registry);
 
         $builder
             ->from('\\NeuroSYS\\DoctrineDatatables\\Tests\\Entity\\Feature')
-            ->with('fullName')
-            ->add('text', 'product.name')
-            ->add('text', 'name')
-            ->end()
             ->add("number")
+            ->with('fullName')
+                ->add('text', 'product.name')
+                ->add('text', 'name')
+            ->end()
         ;
 
         $results = $builder->getDatatable()
@@ -147,7 +147,7 @@ class BuilderTest extends BaseTestCase
         }
 
         // fetch real results
-        $sorted = $this->_em->getConnection()->query("SELECT f.id, p.name as p_name, f.name as f_name FROM features f LEFT JOIN products p ON p.id = f.product_id ORDER BY p.name DESC, f.name DESC")->fetchAll();
+        $sorted = $this->_em->getConnection()->query("SELECT f.id, p.name as p_name, f.name as f_name FROM features f LEFT JOIN products p ON p.id = f.product_id WHERE p.name LIKE '%Laptop%' ORDER BY p.name DESC, f.name DESC")->fetchAll();
         foreach ($sorted as $i => $row) {
             $sorted[$i] = $row['p_name'] . ' ' . $row['f_name'];
         }
