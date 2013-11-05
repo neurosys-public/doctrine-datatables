@@ -31,6 +31,11 @@ class MultiField extends Field
         return $this;
     }
 
+    public function getFields()
+    {
+        return $this->fields;
+    }
+
     /*
      * @param QueryBuilder $qb
      *
@@ -62,6 +67,9 @@ class MultiField extends Field
         $items = array();
         foreach ($this->fields as $field) {
             $items[] = $values[$field->getAlias()];
+        }
+        if ($this->formatter) {
+            return call_user_func_array($this->formatter, array($this, $items));
         }
         return implode(' ', $items); // TODO: make separator configurable
     }

@@ -175,6 +175,19 @@ class DatatableBuilder
         return $datatable;
     }
 
+    public function setFormatter($formatter)
+    {
+        if ($this->parent) {
+            if ($this->parent->getFields()) {
+                // TODO: set formatter to last field (?)
+            }
+            $this->parent->setFormatter($formatter);
+        } else if ($this->fields) {
+            $this->fields[count($this->fields)-1]->setFormatter($formatter);
+        }
+        return $this;
+    }
+
     protected function autoResolveFields()
     {
         for ($i = 0; $i < $this->getParameter('iColumns'); $i++) {

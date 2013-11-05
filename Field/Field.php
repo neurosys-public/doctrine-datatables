@@ -47,6 +47,11 @@ abstract class Field
      */
     private static $aliasIndex = 1;
 
+    /**
+     * @var callback
+     */
+    protected $formatter;
+
     public function __construct($name, $alias = null)
     {
         $this->name    = $name;
@@ -210,6 +215,17 @@ abstract class Field
 
     public function format(array $values)
     {
+        if ($this->formatter) {
+            return call_user_func_array($this->formatter, array($this, @$values[$this->getAlias()], $values));
+        }
         return $values[$this->getAlias()];
+    }
+
+    public function setFormatter($formatter)
+    {
+        if (!is_callable($formatter)) {
+            throw new \Exception("Formatter must be a collable");
+        }
+        $this->formatter = $formatter;
     }
 }

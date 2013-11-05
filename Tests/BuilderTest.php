@@ -192,4 +192,36 @@ class BuilderTest extends BaseTestCase
         $expected = $this->_em->getConnection()->query("SELECT p.id, p.name, p.enabled FROM products p WHERE enabled = 1 ORDER BY p.name ASC")->fetchAll();
         $this->assertEquals($expected, $results);
     }
+    public function testFormatter()
+    {
+        $request  = $this->createSearchRequest(array('sSortDir_0' => 'desc', 'iSortCol_0' => 1), array('product.price', 'fullName'), array('', 'Laptop'));
+        $builder  = new DatatableBuilder($this->_em, $request, $this->registry);
+
+        $builder
+            ->from('\\NeuroSYS\\DoctrineDatatables\\Tests\\Entity\\Feature')
+            ->add("number")
+            ->with('fullName')
+                ->setFormatter(function ($field, $values) { return $values[0] . ' - ' . $values[1]; })
+                ->add('text', 'product.name')
+                ->add('text', 'name')
+            ->end()
+        ;
+
+        $results = $builder->getDatatable()
+            ->getResult();
+        foreach ($results as $i => $result) {
+            $results[$i] = $result['fullName'];
+        }
+
+        // fetch real results
+        $sorted = $this->_em->getConnection()->query("SELECT f.id, p.name as p_name, f.name as f_name FROM features f LEFT JOIN products p ON p.id = f.product_id WHERE p.name LIKE '%Laptop%' ORDER BY p.name DESC, f.name DESC")->fetchAll();
+        foreach ($sorted as $i => $row) {
+            $sorted[$i] = $row['p_name'] . ' - ' . $row['f_name'];
+        }
+
+        $this->assertEquals($sorted, $results);
+    }
+
+
+
 }
