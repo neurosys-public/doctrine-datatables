@@ -272,7 +272,7 @@ class Datatable extends MultiField
 
     /**
      * @param QueryBuilder $qb
-     * @return $this
+     * @return Datatable
      */
     public function from(QueryBuilder $qb)
     {
@@ -285,7 +285,7 @@ class Datatable extends MultiField
 
     /**
      * @param QueryBuilder $qb
-     * @return $this
+     * @return Datatable
      */
     public function filter(QueryBuilder $qb)
     {
@@ -303,7 +303,7 @@ class Datatable extends MultiField
 
     /**
      * @param QueryBuilder $qb
-     * @return $this
+     * @return Datatable
      */
     public function select(QueryBuilder $qb)
     {
@@ -318,16 +318,8 @@ class Datatable extends MultiField
 
     /**
      * @param QueryBuilder $qb
-     * @return $this
+     * @return Datatable
      */
-    public function join(QueryBuilder $qb)
-    {
-        foreach ($this->fields as $field) {
-            $field->join($qb);
-        }
-        return $this;
-    }
-
     protected function limit(QueryBuilder $qb)
     {
         $qb->setMaxResults($this->getMaxResults());

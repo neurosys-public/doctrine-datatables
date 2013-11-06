@@ -92,6 +92,10 @@ class MultiField extends Field
         }
     }
 
+    /**
+     * @param QueryBuilder $qb
+     * @return MultiField
+     */
     public function join(QueryBuilder $qb)
     {
         foreach ($this->fields as $field) {

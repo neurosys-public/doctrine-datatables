@@ -1,6 +1,7 @@
 <?php
 namespace NeuroSYS\DoctrineDatatables\Field;
 
+use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
 use Symfony\Component\Finder\Exception\OperationNotPermitedException;
 
@@ -10,8 +11,6 @@ class Entity extends Field
      * @var string
      */
     protected $className;
-
-    protected $joined = false;
 
     protected $relations = array();
 
@@ -33,16 +32,20 @@ class Entity extends Field
         parent::__construct($name, $alias);
     }
 
-    public function setJoined($joined)
+    public function isJoined(QueryBuilder $qb)
     {
-        $this->joined = $joined;
-
-        return $this;
-    }
-
-    public function isJoined()
-    {
-        return $this->joined;
+        /**
+         * @var Join[] $join
+         */
+        $joins = $qb->getDQLPart('join');
+        foreach ($joins as $join) {
+            foreach ($join as $j) {
+                if ($j->getAlias() == $this->getAlias()) { // already joined
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public function getClassName()
@@ -52,10 +55,8 @@ class Entity extends Field
 
     public function join(QueryBuilder $qb)
     {
-        if (false === $this->isJoined() && $this->getParent()) { // dont join root entity
+        if (false === $this->isJoined($qb) && $this->getParent()) { // dont join root entity
             $qb->leftJoin($this->getFullName(), $this->getAlias());
-
-            $this->setJoined(true);
         }
 
         return parent::join($qb);
