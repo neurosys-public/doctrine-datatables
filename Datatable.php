@@ -6,14 +6,10 @@ use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use NeuroSYS\DoctrineDatatables\Field\Entity;
 use NeuroSYS\DoctrineDatatables\Field\Field;
+use NeuroSYS\DoctrineDatatables\Field\MultiField;
 
-class Datatable extends Field
+class Datatable extends MultiField
 {
-    /**
-     * @var Field[]
-     */
-    private $fields = array();
-
     /**
      * @var EntityManager
      */
@@ -79,26 +75,6 @@ class Datatable extends Field
     public function getEntity()
     {
         return $this->entity;
-    }
-
-    /**
-     * @param Field $field
-     */
-    public function addField(Field $field)
-    {
-        $this->fields[] = $field;
-
-        return $this;
-    }
-
-    /**
-     * @param Field[] $fields
-     */
-    public function setFields(array $fields)
-    {
-        $this->fields = $fields;
-
-        return $this;
     }
 
     /**
@@ -196,20 +172,55 @@ class Datatable extends Field
         foreach ($results as $i => $result) {
             $rootRow = array('id' => $result['id']);
 
-
             foreach ($this->fields as $field) {
-                $row = &$rootRow;
-                foreach ($field->getPath() as $name) {
-                    if (!isset($row[$name])) {
-                        $row[$name] = array();
+                if ($field instanceof MultiField) {
+                    foreach ($field->getFields() as $subField) {
+                        $row = &$rootRow;
+                        foreach ($subField->getPath() as $name) {
+                            if (!isset($row[$name])) {
+                                $row[$name] = array();
+                            }
+                            $row = &$row[$name];
+                        }
+                        $row = $result[$subField->getAlias()];
                     }
-                    $row = &$row[$name];
+                } else {
+                    $row = &$rootRow;
+                    foreach ($field->getPath() as $name) {
+                        if (!isset($row[$name])) {
+                            $row[$name] = array();
+                        }
+                        $row = &$row[$name];
+                    }
+                    $row = $result[$field->getAlias()];
                 }
-                $row = $field->format($result);
             }
-            $results[$i] = $rootRow;
+            $results[$i] = $this->format($rootRow);
         }
         return $results;
+    }
+
+    /**
+     * @param array $values
+     * @return array
+     */
+    public function format(array $values)
+    {
+        if ($this->formatter) {
+            return call_user_func_array($this->formatter, array($this, $values));
+        }
+        foreach ($this->getFields() as $field) {
+            // get field value by reference
+            $value = &$field->getValue($values);
+            // set formatted value
+            $value = $field->format($values);
+        }
+        return $values;
+    }
+
+    public function getPath()
+    {
+        return array();
     }
 
     /**

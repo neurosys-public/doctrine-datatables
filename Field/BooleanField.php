@@ -7,7 +7,7 @@ class BooleanField extends ChoiceField
 {
     public function format(array $values)
     {
-        return (bool)$values[$this->getAlias()];
+        return (bool) $this->getValue($values);
     }
 
     public function filter(QueryBuilder $qb)

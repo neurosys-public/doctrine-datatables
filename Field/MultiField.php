@@ -17,6 +17,10 @@ class MultiField extends Field
         $this->setFields($fields);
     }
 
+    /**
+     * @param Field[] $fields
+     * @return $this
+     */
     public function setFields(array $fields)
     {
         $this->fields = $fields;
@@ -24,6 +28,10 @@ class MultiField extends Field
         return $this;
     }
 
+    /**
+     * @param Field $field
+     * @return $this
+     */
     public function addField(Field $field)
     {
         $this->fields[] = $field;
@@ -31,6 +39,9 @@ class MultiField extends Field
         return $this;
     }
 
+    /**
+     * @return Field[]
+     */
     public function getFields()
     {
         return $this->fields;
@@ -64,14 +75,14 @@ class MultiField extends Field
 
     public function format(array $values)
     {
+        if ($this->formatter) {
+            return call_user_func_array($this->formatter, array($this, $values));
+        }
         $items = array();
         foreach ($this->fields as $field) {
-            $items[] = $values[$field->getAlias()];
+            $items[] = $field->getValue($values);
         }
-        if ($this->formatter) {
-            return call_user_func_array($this->formatter, array($this, $items));
-        }
-        return implode(' ', $items); // TODO: make separator configurable
+        return implode(' ', $items);
     }
 
     public function order(QueryBuilder $qb, $dir = 'asc')
@@ -80,4 +91,23 @@ class MultiField extends Field
             $qb->addOrderBy($field->getFullName(), $dir);
         }
     }
+
+    public function join(QueryBuilder $qb)
+    {
+        foreach ($this->fields as $field) {
+            $field->join($qb);
+        }
+        return $this;
+    }
+
+    public function &getValue(&$values)
+    {
+        foreach ($this->getFields() as $subField) {
+            $value = &$subField->getValue($values);
+            $value = $subField->format($values);
+        }
+        $values[$this->getName()] = null;
+        return $values[$this->getName()];
+    }
+
 } 

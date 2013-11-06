@@ -218,7 +218,8 @@ abstract class Field
         if ($this->formatter) {
             return call_user_func_array($this->formatter, array($this, @$values[$this->getAlias()], $values));
         }
-        return $values[$this->getAlias()];
+
+        return $this->getValue($values);
     }
 
     public function setFormatter($formatter)
@@ -227,5 +228,19 @@ abstract class Field
             throw new \Exception("Formatter must be a collable");
         }
         $this->formatter = $formatter;
+    }
+
+    /**
+     * Gets field value based on its path and returns reference
+     *
+     * @param $values
+     * @return mixed
+     */
+    public function &getValue(&$values)
+    {
+        foreach ($this->getPath() as $name) {
+            $values = &$values[$name];
+        }
+        return $values;
     }
 }

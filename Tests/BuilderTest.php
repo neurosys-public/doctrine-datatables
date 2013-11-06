@@ -201,7 +201,7 @@ class BuilderTest extends BaseTestCase
             ->from('\\NeuroSYS\\DoctrineDatatables\\Tests\\Entity\\Feature')
             ->add("number")
             ->with('fullName')
-                ->setFormatter(function ($field, $values) { return $values[0] . ' - ' . $values[1]; })
+                ->setFormatter(function ($field, $values) { return $values['product']['name'] . ' - ' . $values['name']; })
                 ->add('text', 'product.name')
                 ->add('text', 'name')
             ->end()

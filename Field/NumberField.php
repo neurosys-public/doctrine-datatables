@@ -5,6 +5,6 @@ class NumberField extends RangeField
 {
     public function format(array $values)
     {
-        return (int) $values[$this->getAlias()];
+        return (int) $this->getValue($values);
     }
 }
