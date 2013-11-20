@@ -5,7 +5,7 @@ use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
 use Symfony\Component\Finder\Exception\OperationNotPermitedException;
 
-class Entity extends Field
+class Entity extends AbstractField
 {
     /**
      * @var string

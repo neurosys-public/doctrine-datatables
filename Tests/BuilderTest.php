@@ -23,6 +23,10 @@ class BuilderTest extends BaseTestCase
             ->add("number")
         ;
 
+        //echo $builder->getDatatable()->getResultQueryBuilder()->getQuery()->getDQL();
+        //$data = $builder->getDatatable()->getResultQueryBuilder()->getQuery()->getResult();
+        //var_dump($data); die();
+
         $response = $builder->getDatatable()
             ->getResponseArray();
 
@@ -52,6 +56,7 @@ class BuilderTest extends BaseTestCase
                 'id' => 1,
                 'name' => 'CPU I7 Generation',
                 'product' => array(
+                    'id' => 1,
                     'price' => '1000',
                 ),
             ),
@@ -142,6 +147,7 @@ class BuilderTest extends BaseTestCase
 
         $results = $builder->getDatatable()
             ->getResult();
+
         foreach ($results as $i => $result) {
             $results[$i] = $result['fullName'];
         }
@@ -222,6 +228,20 @@ class BuilderTest extends BaseTestCase
         $this->assertEquals($sorted, $results);
     }
 
+    public function testOneToManyHudrating()
+    {
+        $request  = $this->createSearchRequest(array('sSortDir_0' => 'desc', 'iSortCol_0' => 1), array('name', 'features'), array('', '1,2,3,4'));
+        $builder  = new DatatableBuilder($this->_em, $request, $this->registry);
 
+        $builder
+            ->from('\\NeuroSYS\\DoctrineDatatables\\Tests\\Entity\\Product')
+                ->add("text")
+                ->add("choice", "features.name", array('search_field' => 'id'))
+            ;
 
+        $results = $builder->getDatatable()->getResult();
+
+        $this->assertNotEmpty($results);
+        $this->assertNotEmpty($results[0]['features']);
+    }
 }

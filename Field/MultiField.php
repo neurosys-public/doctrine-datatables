@@ -3,7 +3,7 @@ namespace NeuroSYS\DoctrineDatatables\Field;
 
 use Doctrine\ORM\QueryBuilder;
 
-class MultiField extends Field
+class MultiField extends AbstractField
 {
     /**
      * @var Field[]
@@ -32,7 +32,7 @@ class MultiField extends Field
      * @param Field $field
      * @return $this
      */
-    public function addField(Field $field)
+    public function addField(AbstractField $field)
     {
         $this->fields[] = $field;
 
@@ -107,11 +107,29 @@ class MultiField extends Field
     public function &getValue(&$values)
     {
         foreach ($this->getFields() as $subField) {
-            $value = &$subField->getValue($values);
-            $value = $subField->format($values);
+            //$value = &$subField->getValue($values);
+            //$value = $subField->format($values);
         }
         $values[$this->getName()] = null;
         return $values[$this->getName()];
     }
 
-} 
+    public function addPartials(&$partials, $qb)
+    {
+        foreach ($this->getFields() as $field) {
+            if ($field->getParent()) {
+                if (isset($partials[$field->getParent()->getAlias()])) {
+                    $partials[$field->getParent()->getAlias()][] = $field->getName();
+                } else {
+                    // TODO: fetch primary key name from metadata
+                    $partials[$field->getParent()->getAlias()] = array('id', $field->getName());
+                }
+            } elseif ($field instanceof MultiField) {
+                $field->addPartials($partials, $qb);
+            } else {
+                $field->select($qb);
+            }
+        }
+        return $partials;
+    }
+}

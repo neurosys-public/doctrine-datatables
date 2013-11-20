@@ -2,7 +2,7 @@
 namespace NeuroSYS\DoctrineDatatables;
 
 use NeuroSYS\DoctrineDatatables\Field\Entity;
-use NeuroSYS\DoctrineDatatables\Field\Field;
+use NeuroSYS\DoctrineDatatables\Field\AbstractField;
 
 class FieldRegistry
 {

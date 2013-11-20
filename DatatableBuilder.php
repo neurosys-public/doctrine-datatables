@@ -4,11 +4,8 @@ namespace NeuroSYS\DoctrineDatatables;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 use NeuroSYS\DoctrineDatatables\Field\Entity;
-use NeuroSYS\DoctrineDatatables\Field\Field;
+use NeuroSYS\DoctrineDatatables\Field\AbstractField;
 use NeuroSYS\DoctrineDatatables\Field\MultiField;
-use Symfony\Component\DependencyInjection\ContainerAware;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\HttpFoundation\Request;
 
 class DatatableBuilder
 {
@@ -23,7 +20,7 @@ class DatatableBuilder
     private $entity;
 
     /**
-     * @var array
+     * @var AbstractField[]
      */
     private $fields = array();
 

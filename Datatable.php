@@ -5,7 +5,7 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use NeuroSYS\DoctrineDatatables\Field\Entity;
-use NeuroSYS\DoctrineDatatables\Field\Field;
+use NeuroSYS\DoctrineDatatables\Field\AbstractField;
 use NeuroSYS\DoctrineDatatables\Field\MultiField;
 
 class Datatable extends MultiField
@@ -168,34 +168,16 @@ class Datatable extends MultiField
 
     public function getResult()
     {
-        $results = $this->getResultQueryBuilder()->getQuery()->getResult();
+        $results = $this->getResultQueryBuilder()->getQuery()->getArrayResult();
         foreach ($results as $i => $result) {
-            $rootRow = array('id' => $result['id']);
-
-            foreach ($this->fields as $field) {
-                if ($field instanceof MultiField) {
-                    foreach ($field->getFields() as $subField) {
-                        $row = &$rootRow;
-                        foreach ($subField->getPath() as $name) {
-                            if (!isset($row[$name])) {
-                                $row[$name] = array();
-                            }
-                            $row = &$row[$name];
-                        }
-                        $row = $result[$subField->getAlias()];
-                    }
-                } else {
-                    $row = &$rootRow;
-                    foreach ($field->getPath() as $name) {
-                        if (!isset($row[$name])) {
-                            $row[$name] = array();
-                        }
-                        $row = &$row[$name];
-                    }
-                    $row = $result[$field->getAlias()];
+            for ($j = 0; $j < 100; $j++) {
+                if (!array_key_exists($j, $result)) {
+                    break;
                 }
+                $result = array_merge($result, $result[$j]);
+                unset($result[$j]);
             }
-            $results[$i] = $this->format($rootRow);
+            $results[$i] = $this->format($result);
         }
         return $results;
     }
@@ -308,10 +290,12 @@ class Datatable extends MultiField
     public function select(QueryBuilder $qb)
     {
         // TODO: fetch primary key name from metadata
-        $qb->addSelect($this->getEntity()->getAlias() . '.id');
+        $partials[$this->getEntity()->getAlias()] = array('id');
 
-        foreach ($this->fields as $field) {
-            $field->select($qb);
+        $this->addPartials($partials, $qb);
+
+        foreach ($partials as $alias => $partial) {
+            $qb->addSelect('partial ' . $alias . '.{' . implode(',', $partial) . '}');
         }
         return $this;
     }

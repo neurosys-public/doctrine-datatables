@@ -39,8 +39,8 @@ class Product
     protected $description;
 
     /**
-     * @ORMM\OneToMany(targetEntity="Feature", mappedBy="product")
-     * */
+     * @OneToMany(targetEntity="Feature", mappedBy="product")
+     **/
     protected $features;
 
     public function __construct()
