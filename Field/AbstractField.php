@@ -66,6 +66,9 @@ abstract class AbstractField
 
     public static function generateAlias($name)
     {
+        if (!$name) {
+            $name = 'x';
+        }
         $name = preg_replace('/[^A-Z]/i', '', $name);
 
         return $name[0] . (self::$aliasIndex++);

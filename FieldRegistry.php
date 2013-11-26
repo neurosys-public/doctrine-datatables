@@ -36,6 +36,9 @@ class FieldRegistry
      */
     public function resolve($type, $path, Entity $root, $options = array())
     {
+        if (empty($type)) {
+            $type = 'empty';
+        }
         if (!array_key_exists($type, $this->types)) {
             throw new \Exception(sprintf("Field type '%s' does not exist!", $type));
         }
@@ -66,6 +69,7 @@ class FieldRegistry
 
     protected function registerStandardFields()
     {
+        $this->register("empty", '\\NeuroSYS\\DoctrineDatatables\\Field\\EmptyField');
         $this->register("text", '\\NeuroSYS\\DoctrineDatatables\\Field\\TextField');
         $this->register("number", '\\NeuroSYS\\DoctrineDatatables\\Field\\NumberField');
         $this->register("choice", '\\NeuroSYS\\DoctrineDatatables\\Field\\ChoiceField');

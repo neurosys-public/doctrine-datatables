@@ -117,6 +117,9 @@ class MultiField extends AbstractField
     public function addPartials(&$partials, $qb)
     {
         foreach ($this->getFields() as $field) {
+            if (!$field->getName()) {
+                continue;
+            }
             if ($field->getParent()) {
                 if (isset($partials[$field->getParent()->getAlias()])) {
                     $partials[$field->getParent()->getAlias()][] = $field->getName();

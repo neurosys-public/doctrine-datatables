@@ -170,7 +170,7 @@ class Datatable extends MultiField
     {
         $results = $this->getResultQueryBuilder()->getQuery()->getArrayResult();
         foreach ($results as $i => $result) {
-            for ($j = 0; $j < 100; $j++) {
+            for ($j = 0; true; $j++) {
                 if (!array_key_exists($j, $result)) {
                     break;
                 }

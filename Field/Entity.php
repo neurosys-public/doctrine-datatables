@@ -55,6 +55,10 @@ class Entity extends AbstractField
 
     public function join(QueryBuilder $qb)
     {
+        if ($this->getParent()) {
+            $this->getParent()->join($qb);
+        }
+
         if (false === $this->isJoined($qb) && $this->getParent()) { // dont join root entity
             $qb->leftJoin($this->getFullName(), $this->getAlias());
         }
