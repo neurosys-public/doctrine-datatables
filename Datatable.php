@@ -235,8 +235,6 @@ class Datatable extends MultiField
             ->from($qb)
             ->join($qb)
             ->filter($qb)
-            ->limit($qb)
-            ->offset($qb)
         ;
 
         return (int) $qb->getQuery()->getSingleScalarResult();
