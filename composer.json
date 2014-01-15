@@ -11,7 +11,7 @@
     ],
     "require": {
         "php": ">=5.3.3",
-        "doctrine/orm": ">=2.2.3,<2.4-dev"
+        "doctrine/orm": "~2.2"
     },
     "autoload": {
         "psr-0": { "NeuroSYS\\DoctrineDatatables\\": "" }
