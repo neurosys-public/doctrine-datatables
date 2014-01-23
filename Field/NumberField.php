@@ -3,8 +3,11 @@ namespace NeuroSYS\DoctrineDatatables\Field;
 
 class NumberField extends RangeField
 {
-    public function format(array $values)
+    public function format($values, $value = null)
     {
-        return (int) $this->getValue($values);
+        if (isset($this->options['precision'])) {
+            $value = round($value, $this->options['precision']);
+        }
+        return (float) $value;
     }
 }

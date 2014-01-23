@@ -5,8 +5,9 @@ use Doctrine\Common\EventManager;
 use Doctrine\DBAL\Portability\Connection;
 use Doctrine\ORM\Configuration;
 use Doctrine\ORM\EntityManager;
-use NeuroSYS\DoctrineDatatables\Datatable;
-use NeuroSYS\DoctrineDatatables\DatatableBuilder;
+use NeuroSYS\DoctrineDatatables\Renderer\TwigRenderer;
+use NeuroSYS\DoctrineDatatables\Table;
+use NeuroSYS\DoctrineDatatables\TableBuilder;
 use NeuroSYS\DoctrineDatatables\Field\Entity;
 use NeuroSYS\DoctrineDatatables\FieldBuilder;
 
@@ -14,20 +15,21 @@ class BuilderTest extends BaseTestCase
 {
     public function testBasics()
     {
-        $request  = $this->createSearchRequest(array('iDisplayLength' => 2), array('name', 'product.price'));
-        $builder  = new DatatableBuilder($this->_em, $request, $this->registry);
+        $request  = $this->createSearchRequest(array('iDisplayLength' => 2), array('name', 'price'));
+        $builder  = new TableBuilder($this->_em, $request, $this->registry);
 
         $builder
             ->from('\\NeuroSYS\\DoctrineDatatables\\Tests\\Entity\\Feature', 'f')
-            ->add("text")
-            ->add("number")
+            ->join("f.product", "p")
+            ->add("text", "f.name")
+            ->add("number", "p.name")
         ;
 
-        //echo $builder->getDatatable()->getResultQueryBuilder()->getQuery()->getDQL();
-        //$data = $builder->getDatatable()->getResultQueryBuilder()->getQuery()->getResult();
-        //var_dump($data); die();
+        //echo $builder->getTable()->getResultQueryBuilder()->getQuery()->getDQL();
+        //$data = $builder->getTable()->getResultQueryBuilder()->getQuery()->getArrayResult();
 
-        $response = $builder->getDatatable()
+
+        $response = $builder->getTable()
             ->getResponseArray();
 
         $this->assertEquals(2, count($response['aaData']));
@@ -39,42 +41,41 @@ class BuilderTest extends BaseTestCase
 
     public function testRangeField()
     {
-        $request  = $this->createSearchRequest(array(), array('name', 'product.price'), array('Generation', '10,'));
-        $builder  = new DatatableBuilder($this->_em, $request, $this->registry);
+        $request  = $this->createSearchRequest(array(), array('name', 'price'), array('Generation', '10,'));
+        $builder  = new TableBuilder($this->_em, $request, $this->registry);
 
         $builder
             ->from('\\NeuroSYS\\DoctrineDatatables\\Tests\\Entity\\Feature', 'f')
-            ->add("text")
-            ->add("number")
+            ->join('f.product', 'p')
+            ->add("text", 'f.name')
+            ->add("number", 'p.price')
         ;
 
-        $result = $builder->getDatatable()
-            ->getResult();
+        $result = $builder->getTable()
+            ->getData();
 
         $this->assertEquals(array(
             array (
                 'id' => 1,
                 'name' => 'CPU I7 Generation',
-                'product' => array(
-                    'id' => 1,
-                    'price' => '1000',
-                ),
+                'price' => '1000',
             ),
         ), $result);
     }
 
     public function testFilterByNonExistentText()
     {
-        $request  = $this->createSearchRequest(array(), array('name', 'product.price'), array('no result please'));
-        $builder  = new DatatableBuilder($this->_em, $request, $this->registry);
+        $request  = $this->createSearchRequest(array(), array('name', 'price'), array('no result please'));
+        $builder  = new TableBuilder($this->_em, $request, $this->registry);
 
         $builder
             ->from('\\NeuroSYS\\DoctrineDatatables\\Tests\\Entity\\Feature', 'f')
-            ->add("text")
-            ->add("number")
+            ->join('f.product', 'p')
+            ->add("text", 'f.name')
+            ->add("number", 'p.price')
         ;
 
-        $result = $builder->getDatatable()
+        $result = $builder->getTable()
             ->getResult();
 
         $this->assertEquals(0, count($result));
@@ -82,30 +83,32 @@ class BuilderTest extends BaseTestCase
 
     public function testBooleanBield()
     {
-        $request  = $this->createSearchRequest(array(), array('name', 'product.enabled'), array('', '1'));
-        $builder  = new DatatableBuilder($this->_em, $request, $this->registry);
+        $request  = $this->createSearchRequest(array(), array('name', 'enabled'), array('', '1'));
+        $builder  = new TableBuilder($this->_em, $request, $this->registry);
 
         $builder
             ->from('\\NeuroSYS\\DoctrineDatatables\\Tests\\Entity\\Feature', 'f')
-            ->add("text")
-            ->add("boolean")
+            ->join('f.product', 'p')
+            ->add("text", 'f.name')
+            ->add("boolean", 'p.enabled')
         ;
 
-        $result = $builder->getDatatable()
-            ->getResult();
+        $result = $builder->getTable()
+            ->getData();
 
         $this->assertEquals(3, count($result));
 
-        $request  = $this->createSearchRequest(array(), array('name', 'product.enabled'), array('', '0'));
-        $builder  = new DatatableBuilder($this->_em, $request, $this->registry);
+        $request  = $this->createSearchRequest(array(), array('name', 'enabled'), array('', '0'));
+        $builder  = new TableBuilder($this->_em, $request, $this->registry);
 
         $builder
             ->from('\\NeuroSYS\\DoctrineDatatables\\Tests\\Entity\\Feature', 'f')
-            ->add("text")
-            ->add("boolean")
+            ->join("f.product", "p")
+            ->add("text", "f.name")
+            ->add("boolean", "p.enabled")
         ;
 
-        $result = $builder->getDatatable()
+        $result = $builder->getTable()
             ->getResult();
 
         $this->assertEquals(1, count($result));
@@ -117,15 +120,15 @@ class BuilderTest extends BaseTestCase
         $ids = array_map('current', $ids);
 
         $request  = $this->createSearchRequest(array(), array('id', 'name'), array(implode(',', $ids)));
-        $builder  = new DatatableBuilder($this->_em, $request, $this->registry);
+        $builder  = new TableBuilder($this->_em, $request, $this->registry);
 
         $builder
             ->from('\\NeuroSYS\\DoctrineDatatables\\Tests\\Entity\\Feature', 'f')
-            ->add("choice")
-            ->add("text")
+            ->add("choice", "f.id")
+            ->add("text", "f.name")
         ;
 
-        $result = $builder->getDatatable()
+        $result = $builder->getTable()
             ->getResult();
 
         $this->assertEquals(count($ids), count($result));
@@ -133,20 +136,23 @@ class BuilderTest extends BaseTestCase
 
     public function testMultiFieldWithSort()
     {
-        $request  = $this->createSearchRequest(array('sSortDir_0' => 'desc', 'iSortCol_0' => 1), array('product.price', 'fullName'), array('', 'Laptop'));
-        $builder  = new DatatableBuilder($this->_em, $request, $this->registry);
+        $loader   = new \Twig_Loader_String();
+        $renderer = new TwigRenderer($loader);
+        $request  = $this->createSearchRequest(array('sSortDir_0' => 'desc', 'iSortCol_0' => 1), array('price', 'fullName'), array('', 'Laptop'));
+        $builder  = new TableBuilder($this->_em, $request, $this->registry, $renderer);
 
         $builder
-            ->from('\\NeuroSYS\\DoctrineDatatables\\Tests\\Entity\\Feature')
-            ->add("number")
-            ->with('fullName')
-                ->add('text', 'product.name')
-                ->add('text', 'name')
+            ->from('\\NeuroSYS\\DoctrineDatatables\\Tests\\Entity\\Feature', 'f')
+            ->join("f.product", "p")
+            ->add("number", "p.price")
+            ->add('text', array('p.name', 'f.name'), null, array(
+                'template' => '{{ values.product.name }} {{ values.name }}',
+            ))
             ->end()
         ;
 
-        $results = $builder->getDatatable()
-            ->getResult();
+        $results = $builder->getTable()
+            ->getArrayResult();
 
         foreach ($results as $i => $result) {
             $results[$i] = $result['fullName'];
@@ -161,59 +167,43 @@ class BuilderTest extends BaseTestCase
         $this->assertEquals($sorted, $results);
     }
 
-    public function testAutoResolveFields()
-    {
-        $request  = $this->createSearchRequest(array(), array('name', 'price'), array());
-        $builder  = new DatatableBuilder($this->_em, $request, $this->registry);
-
-        $builder
-            ->from('\\NeuroSYS\\DoctrineDatatables\\Tests\\Entity\\Product')
-        ;
-
-        $results = $builder->getDatatable()
-            ->getResult();
-
-        // fetch real results
-        $expected = $this->_em->getConnection()->query("SELECT p.id, p.name, p.price FROM products p ORDER BY p.name ASC")->fetchAll();
-        $this->assertEquals($expected, $results);
-    }
-
     public function testCustomQueryBuilder()
     {
         $request  = $this->createSearchRequest(array(), array('name', 'enabled'), array());
-        $builder  = new DatatableBuilder($this->_em, $request, $this->registry);
 
         $qb = $this->_em->createQueryBuilder()
             ->from('\\NeuroSYS\\DoctrineDatatables\\Tests\\Entity\\Product', 'p')
             ->where('p.enabled = 1')
         ;
+        $builder  = new TableBuilder($this->_em, $request, $this->registry);
         $builder
             ->setQueryBuilder($qb)
+            ->add('text', 'p.name')
+            ->add('boolean', 'p.enabled')
         ;
 
-        $results = $builder->getDatatable()
-            ->getResult();
+        $results = $builder->getTable()
+            ->getData();
 
         // fetch real results
         $expected = $this->_em->getConnection()->query("SELECT p.id, p.name, p.enabled FROM products p WHERE enabled = 1 ORDER BY p.name ASC")->fetchAll();
         $this->assertEquals($expected, $results);
     }
-    public function testFormatter()
+    public function testRenderer()
     {
-        $request  = $this->createSearchRequest(array('sSortDir_0' => 'desc', 'iSortCol_0' => 1), array('product.price', 'fullName'), array('', 'Laptop'));
-        $builder  = new DatatableBuilder($this->_em, $request, $this->registry);
+        $request  = $this->createSearchRequest(array('sSortDir_0' => 'desc', 'iSortCol_0' => 1), array('price', 'fullName'), array('', 'Laptop'));
+        $builder  = new TableBuilder($this->_em, $request, $this->registry, new TwigRenderer(new \Twig_Loader_String()));
 
         $builder
-            ->from('\\NeuroSYS\\DoctrineDatatables\\Tests\\Entity\\Feature')
-            ->add("number")
-            ->with('fullName')
-                ->setFormatter(function ($field, $values) { return $values['product']['name'] . ' - ' . $values['name']; })
-                ->add('text', 'product.name')
-                ->add('text', 'name')
-            ->end()
+            ->from('\\NeuroSYS\\DoctrineDatatables\\Tests\\Entity\\Feature', 'f')
+            ->join("f.product", "p")
+            ->add("number", "p.price")
+            ->add("text", "p.name, f.name", null, array(
+                'template' => '{{ values.product.name }} - {{ values.name }}'
+            ))
         ;
 
-        $results = $builder->getDatatable()
+        $results = $builder->getTable()
             ->getResult();
         foreach ($results as $i => $result) {
             $results[$i] = $result['fullName'];
@@ -228,20 +218,25 @@ class BuilderTest extends BaseTestCase
         $this->assertEquals($sorted, $results);
     }
 
-    public function testOneToManyHudrating()
+    public function testOneToManyHydrating()
     {
-        $request  = $this->createSearchRequest(array('sSortDir_0' => 'desc', 'iSortCol_0' => 1), array('name', 'features'), array('', '1,2,3,4'));
-        $builder  = new DatatableBuilder($this->_em, $request, $this->registry);
+        $request  = $this->createSearchRequest(array('sSortDir_0' => 'desc', 'iSortCol_0' => 1), array('name', 'features'), array('', '1,2'));
+        $builder  = new TableBuilder($this->_em, $request, $this->registry, new TwigRenderer(new \Twig_Loader_String()));
 
         $builder
-            ->from('\\NeuroSYS\\DoctrineDatatables\\Tests\\Entity\\Product')
-                ->add("text")
-                ->add("choice", "features.name", array('search_field' => 'id'))
-            ;
+            ->from('\\NeuroSYS\\DoctrineDatatables\\Tests\\Entity\\Product', 'p')
+            ->join("p.features", "f")
+            ->add("text", "p.name")
+            ->add( "choice", "f.name", "f.id", array(
+                'template' => '{% for f in values.features %}{{ f.name }},{% endfor %}'
+            ))
+        ;
 
-        $results = $builder->getDatatable()->getResult();
+        //echo($builder->getTable()->getResultQueryBuilder()->getDQL());
+
+        $results = $builder->getTable()->getData();
 
         $this->assertNotEmpty($results);
-        $this->assertNotEmpty($results[0]['features']);
+        $this->assertEquals('SolidState drive,CPU I7 Generation,', $results[0]['features']);
     }
 }

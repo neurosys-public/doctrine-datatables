@@ -11,7 +11,15 @@
     ],
     "require": {
         "php": ">=5.3.3",
-        "doctrine/orm": "~2.2"
+        "doctrine/orm": "~2.2",
+        "jms/serializer": "~0.11",
+        "symfony/property-access": "~2.2"
+    },
+    "require-dev": {
+        "twig/twig": "~1.14"
+    },
+    "suggest": {
+        "twig/twig": "Allows field rendering using Twig templating engine"
     },
     "autoload": {
         "psr-0": { "NeuroSYS\\DoctrineDatatables\\": "" }

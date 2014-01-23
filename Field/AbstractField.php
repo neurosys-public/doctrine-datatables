@@ -3,22 +3,16 @@
 namespace NeuroSYS\DoctrineDatatables\Field;
 
 use Doctrine\ORM\QueryBuilder;
+use NeuroSYS\DoctrineDatatables\Table;
 
 abstract class AbstractField
 {
+    protected $searchFields = array();
+
+    protected $selectFields = array();
 
     /**
-     * @var string Field name
-     */
-    protected $name;
-
-    /**
-     * @var string Field alias
-     */
-    protected $alias;
-
-    /**
-     * @var AbstractField
+     * @var Entity
      */
     protected $parent;
 
@@ -42,10 +36,16 @@ abstract class AbstractField
     protected $path;
 
     /**
-     * Alias index used to generate alias for a field
-     * @var int
+     * @var integer Field index in a Datatables request
      */
-    private static $aliasIndex = 1;
+    protected $index;
+
+    /**
+     * Field template
+     *
+     * @var string
+     */
+    protected $template;
 
     /**
      * @var callback
@@ -57,42 +57,43 @@ abstract class AbstractField
      */
     protected $options = array();
 
-    public function __construct($name, $alias = null, $options = array())
+    /**
+     * @var Table
+     */
+    protected $table;
+
+    public function __construct(Table $table, $options = array())
     {
-        $this->name    = $name;
-        $this->alias   = $alias ? $alias : self::generateAlias($name);
         $this->options = $options;
+        $this->table   = $table;
     }
 
-    public static function generateAlias($name)
+    public function setSelect(array $select)
     {
-        if (!$name) {
-            $name = 'x';
-        }
-        $name = preg_replace('/[^A-Z]/i', '', $name);
-
-        return $name[0] . (self::$aliasIndex++);
+        $this->selectFields = $select;
     }
 
-    public function setName($name)
+    public function setSearchFields(array $searchFields)
     {
-        $this->name = $name;
+        $this->searchFields = $searchFields;
+    }
+
+    /**
+     * @param Entity $entity
+     */
+    public function setParent(Entity $entity)
+    {
+        $this->parent = $entity;
 
         return $this;
     }
 
-    public function setAlias($alias)
+    /**
+     * @return Entity
+     */
+    public function getParent()
     {
-        $this->alias = $alias;
-
-        return $this;
-    }
-
-    public function setParent(AbstractField $parent = null)
-    {
-        $this->parent = $parent;
-
-        return $this;
+        return $this->parent;
     }
 
     public function setSearch($search)
@@ -104,12 +105,7 @@ abstract class AbstractField
 
     public function getSearch()
     {
-        return $this->search;
-    }
-
-    public function getParent()
-    {
-        return $this->parent;
+        return isset($this->search) ? $this->search : $this->getTable()->getRequest()->get('sSearch', $this->getIndex());
     }
 
     /**
@@ -127,37 +123,7 @@ abstract class AbstractField
      */
     public function isSearchable()
     {
-        return $this->searchable;
-    }
-
-    /**
-     * Gets this field alias
-     *
-     * @return string
-     */
-    public function getAlias()
-    {
-        return $this->alias;
-    }
-
-    /**
-     * Gets this field name
-     *
-     * @return string
-     */
-    public function getName()
-    {
-        return $this->name;
-    }
-
-    /**
-     * Gets full name containing entity alias and field name
-     *
-     * @return string
-     */
-    public function getFullName()
-    {
-        return ($this->getParent() ? $this->getParent()->getAlias() . '.' : '') . $this->name;
+        return isset($this->searchable) ? $this->searchable : (bool) $this->getTable()->getRequest()->get('bSearchable', $this->getIndex());
     }
 
     public function isSearch()
@@ -172,35 +138,52 @@ abstract class AbstractField
      */
     public function filter(QueryBuilder $qb)
     {
-        $qb->setParameter($this->getName(), '%'.$this->getSearch().'%');
-
-        return $qb->expr()->like($this->getSearchField(), ':' . $this->getName());
+        $orx = $qb->expr()->orX();
+        foreach ($this->getSearchFields() as $i => $field) {
+            $var = preg_replace('/[^a-z0-9]*/i', '', $field) . '_' . $i;
+            $qb->setParameter($var, '%'.$this->getSearch().'%');
+            $orx->add(
+                $qb->expr()->like($field, ':' . $var)
+            );
+        }
+        return $orx;
     }
 
-    public function getSearchField()
+    public function getSearchFields()
     {
-        return ($this->getParent() ? $this->getParent()->getAlias() . '.' : '')
-             . (isset($this->options['search_field']) ? $this->options['search_field'] : $this->getName());
+        return $this->searchFields;
     }
 
-    /**
-     * @return array Field path
-     */
-    public function getPath()
+    public function getSelectPaths()
     {
-        return $this->path ?: array($this->getName());
+        $paths = array();
+        foreach ($this->getSelect() as $entityAlias => $select) {
+            if (!is_array($select)) {
+                $select = array($select);
+            }
+            $entity = $this->getTable()->getEntity($entityAlias);
+            if (!$entity) {
+                throw new \Exception("Internal error, entity not found for alias " . $entityAlias);
+            }
+            foreach ($select as $fieldName) {
+                $path = $entity->getPath();
+                $path[] = $fieldName;
+                $paths[] = $path;
+            }
+        }
+        return $paths;
     }
 
     /**
      * @param $path
      * @return $this
      */
-    public function setPath($path)
+    /*public function setPath($path)
     {
         $this->path = $path;
 
         return $this;
-    }
+    }*/
 
     /**
      * @param QueryBuilder $qb
@@ -208,33 +191,50 @@ abstract class AbstractField
      */
     public function select(QueryBuilder $qb)
     {
-        $qb->addSelect($this->getFullName() /*. ' as ' . $this->getAlias()*/);
+        $qb->addSelect($this->getFullName());
+    }
+
+    /**
+     * Get(Entity alias => field) name pairs
+     * @return array
+     */
+    public function getSelect()
+    {
+        return $this->selectFields;
+    }
+
+    public function isSortable()
+    {
+        return (bool) $this->getTable()->getRequest()->get('bSortable', $this->getIndex());
     }
 
     /**
      * @param QueryBuilder $qb
      * @return $this
      */
-    public function order(QueryBuilder $qb, $dir = 'asc')
+    public function order(QueryBuilder $qb)
     {
-        $qb->addOrderBy($this->getFullName(), $dir);
-    }
-
-    public function join(QueryBuilder $qb)
-    {
-        if ($this->getParent()) {
-            $this->getParent()->join($qb);
+        for ($i = 0; $i < $this->getTable()->getRequest()->get('iSortingCols'); $i++) {
+            if ($this->getTable()->getRequest()->get('iSortCol', $i) == $this->getIndex()) {
+                $dir = $this->getTable()->getRequest()->get('sSortDir', $i);
+                foreach ($this->getSelect() as $entityAlias => $fields) {
+                    $qb->addOrderBy($entityAlias . '.' . $fields, $dir == 'asc' ? 'asc' : 'desc');
+                }
+            }
         }
         return $this;
     }
 
-    public function format(array $values)
+    public function format($values, $value = null)
     {
         if ($this->formatter) {
-            return call_user_func_array($this->formatter, array($this, @$values[$this->getAlias()], $values));
+            return call_user_func_array($this->formatter, array($value, $values, $this));
         }
 
-        return $this->getValue($values);
+        if ($this->template) {
+            return $this->getTable()->getRenderer()->render($this->template, array('values' => $values, 'value' => $value, 'field' => $this));
+        }
+        return $value;
     }
 
     public function setFormatter($formatter)
@@ -245,17 +245,37 @@ abstract class AbstractField
         $this->formatter = $formatter;
     }
 
-    /**
-     * Gets field value based on its path and returns reference
-     *
-     * @param $values
-     * @return mixed
-     */
-    public function &getValue(&$values)
+    public function setTemplate($template)
     {
-        foreach ($this->getPath() as $name) {
-            $values = &$values[$name];
-        }
-        return $values;
+        $this->template = $template;
+    }
+
+    /**
+     * @param int $index
+     */
+    public function setIndex($index)
+    {
+        $this->index = $index;
+    }
+
+    /**
+     * @return int
+     */
+    public function getIndex()
+    {
+        return $this->index;
+    }
+
+    /**
+     * @return Table
+     */
+    public function getTable()
+    {
+        return $this->table;
+    }
+
+    public function __toString()
+    {
+        return $this->getParent() . " => \n\t" . $this->getFullName() . ' as ' . $this->getAlias();
     }
 }

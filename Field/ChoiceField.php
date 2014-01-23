@@ -10,7 +10,13 @@ class ChoiceField extends AbstractField
     {
         $values = @explode(',', $this->getSearch());
 
-        return $qb->expr()->in($this->getSearchField(), $values);
+        $orx = $qb->expr()->orX();
+        foreach ($this->getSearchFields() as $i => $field) {
+            $orx->add(
+                $qb->expr()->in($field, $values)
+            );
+        }
+        return $orx;
     }
 
 } 
