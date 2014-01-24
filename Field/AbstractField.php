@@ -62,6 +62,8 @@ abstract class AbstractField
      */
     protected $table;
 
+    protected $context;
+
     public function __construct(Table $table, $options = array())
     {
         $this->options = $options;
@@ -154,8 +156,21 @@ abstract class AbstractField
         return $this->searchFields;
     }
 
+    public function setContext($context)
+    {
+        $this->context = $context;
+    }
+
+    public function getContext()
+    {
+        return $this->context;
+    }
+
     public function getSelectPaths()
     {
+        if (isset($this->options['context'])) {
+            return array(explode('.', $this->options['context']));
+        }
         $paths = array();
         foreach ($this->getSelect() as $entityAlias => $select) {
             if (!is_array($select)) {
@@ -186,15 +201,6 @@ abstract class AbstractField
     }*/
 
     /**
-     * @param QueryBuilder $qb
-     * @return self
-     */
-    public function select(QueryBuilder $qb)
-    {
-        $qb->addSelect($this->getFullName());
-    }
-
-    /**
      * Get(Entity alias => field) name pairs
      * @return array
      */
@@ -218,7 +224,9 @@ abstract class AbstractField
             if ($this->getTable()->getRequest()->get('iSortCol', $i) == $this->getIndex()) {
                 $dir = $this->getTable()->getRequest()->get('sSortDir', $i);
                 foreach ($this->getSelect() as $entityAlias => $fields) {
-                    $qb->addOrderBy($entityAlias . '.' . $fields, $dir == 'asc' ? 'asc' : 'desc');
+                    foreach ($fields as $field) {
+                        $qb->addOrderBy($entityAlias . '.' . $field, $dir == 'asc' ? 'asc' : 'desc');
+                    }
                 }
             }
         }
@@ -227,22 +235,10 @@ abstract class AbstractField
 
     public function format($values, $value = null)
     {
-        if ($this->formatter) {
-            return call_user_func_array($this->formatter, array($value, $values, $this));
-        }
-
         if ($this->template) {
             return $this->getTable()->getRenderer()->render($this->template, array('values' => $values, 'value' => $value, 'field' => $this));
         }
         return $value;
-    }
-
-    public function setFormatter($formatter)
-    {
-        if (!is_callable($formatter)) {
-            throw new \Exception("Formatter must be a collable");
-        }
-        $this->formatter = $formatter;
     }
 
     public function setTemplate($template)

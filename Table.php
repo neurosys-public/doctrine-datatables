@@ -53,7 +53,7 @@ class Table extends Entity
     /**
      * @var string One of 'array' or 'entity'
      */
-    private $hydrate = 'array';
+    private $hydrate = 'entity';
 
     /**
      * @var Entity[]
@@ -224,17 +224,26 @@ class Table extends Entity
             $results[$key] = $this->getValue($values, $key, $accessor);
         }
         foreach ($this->getFields() as $name => $field) {
-            $value = array();
 
-            try {
-                foreach ($field->getSelectPaths() as $selectPath) {
-                    $value[] = $this->getValue($values, implode('.', $selectPath), $accessor);
+            if ($context = $field->getContext()) {
+                $value = $this->getValue($values, $context, $accessor);
+            } else {
+                $value = array();
+                $selectPaths = $field->getSelectPaths();
+                if (count($selectPaths) == 1) {
+                    try {
+                        foreach ($field->getSelectPaths() as $selectPath) {
+                            $value[] = $this->getValue($values, implode('.', $selectPath), $accessor);
+                        }
+                    } catch (\Exception $ex) {
+                        $value = $values;
+                    }
+                } else {
+                    $value = $values;
                 }
-            } catch (\Exception $ex) {
-                $value = $values;
-            }
-            if (is_array($value) && count($value) == 1) {
-                $value = $value[0];
+                if (is_array($value) && count($value) == 1) {
+                    $value = $value[0];
+                }
             }
             $results[$name] = $field->format($values, $value);
         }
@@ -306,6 +315,7 @@ class Table extends Entity
             ->addFrom($qb)
             ->addJoin($qb)
         ;
+        $qb->resetDQLPart('groupBy');
 
         return (int) $qb->getQuery()->getSingleScalarResult();
     }
@@ -324,7 +334,7 @@ class Table extends Entity
             ->addJoin($qb)
             ->addFilter($qb)
         ;
-
+        $qb->resetDQLPart('groupBy');
         return (int) $qb->getQuery()->getSingleScalarResult();
     }
 
