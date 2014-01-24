@@ -49,6 +49,11 @@ class TableBuilder
         $this->renderer  = $renderer;
     }
 
+    public function getQueryBuilder()
+    {
+        return $this->getTable()->getQueryBuilder();
+    }
+
     public function getTable()
     {
         return $this->table;
@@ -160,7 +165,7 @@ class TableBuilder
      * @param string $type Type of field
      * @return $this
      */
-    public function add($type, $select, $filter = null, $options = array())
+    public function add($type, $select = null, $filter = true, $options = array())
     {
         if (null !== $this->getTable()->getIndex()) {
             $index = $this->getTable()->getIndex();
@@ -170,35 +175,45 @@ class TableBuilder
 
         $name = $this->request->get('mDataProp', $index) ?: $index;
 
-        if (!is_array($select)) {
-            $select = explode(',', $select);
-        }
-        foreach ($select as $key => $value) {
-            if (is_numeric($key)) {
-                list($parentAlias, $fieldName) = explode('.', trim($value));
-                $select[trim($parentAlias)] = $fieldName;
-                unset($select[$key]);
-            }
-        }
-
-        if (!$filter) {
+        if (true === $filter || null === $filter) {
             $filter = $select;
-        } elseif (!is_array($filter)) {
-            if (strpos($filter, '.') !== false) {
-                $filter = array($filter);
-            } else {
-                throw new \Exception("Filter must contain entity alias, '" . $filter . "' given");
-            }
         }
 
-        if (empty($filter)) {
-            throw new \Exception("Search fields must not be empty");
-        }
-        foreach ($filter as $key => $value) {
-            if (!is_numeric($key)) {
-                $filter[] = $key . '.' . $value;
-                unset($filter[$key]);
+        if (empty($select)) {
+            $select = array();
+        } else {
+            if (!is_array($select)) {
+                $select = explode(',', $select);
             }
+            foreach ($select as $key => $value) {
+                if (is_numeric($key)) {
+                    list($parentAlias, $fieldName) = explode('.', trim($value));
+                    if (!isset($select[trim($parentAlias)])) {
+                        $select[trim($parentAlias)] = array();
+                    }
+                    $select[trim($parentAlias)][] = $fieldName;
+                    unset($select[$key]);
+                }
+            }
+        }
+        if (empty($filter)) {
+            $filter = array();
+        } else {
+            if (!is_array($filter)) {
+                $filter = explode(',', $filter);
+                foreach ($filter as $key => $value) {
+                    if (strpos($value, '.') === false) {
+                        throw new \Exception("Filter must contain entity alias, '" . $filter . "' given");
+                    }
+                }
+            }
+
+            /*foreach ($filter as $key => $value) {
+                if (!is_numeric($key)) {
+                    $filter[] = $key . '.' . $value;
+                    unset($filter[$key]);
+                }
+            }*/
         }
         /**
          * @var AbstractField $field
@@ -209,6 +224,9 @@ class TableBuilder
         $field->setSearchFields($filter);
         if (isset($options['template'])) {
             $field->setTemplate($options['template']);
+        }
+        if (isset($options['context'])) {
+            $field->setContext($options['context']);
         }
         $this->getTable()->setField($name, $field);
 
