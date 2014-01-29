@@ -137,7 +137,7 @@ class BuilderTest extends BaseTestCase
     public function testMultiFieldWithSort()
     {
         $loader   = new \Twig_Loader_String();
-        $renderer = new TwigRenderer($loader);
+        $renderer = new TwigRenderer(new \Twig_Environment($loader));
         $request  = $this->createSearchRequest(array('sSortDir_0' => 'desc', 'iSortCol_0' => 1), array('price', 'fullName'), array('', 'Laptop'));
         $builder  = new TableBuilder($this->_em, $request, $this->registry, $renderer);
 
@@ -192,7 +192,7 @@ class BuilderTest extends BaseTestCase
     public function testRenderer()
     {
         $request  = $this->createSearchRequest(array('sSortDir_0' => 'desc', 'iSortCol_0' => 1), array('price', 'fullName'), array('', 'Laptop'));
-        $builder  = new TableBuilder($this->_em, $request, $this->registry, new TwigRenderer(new \Twig_Loader_String()));
+        $builder  = new TableBuilder($this->_em, $request, $this->registry, new TwigRenderer(new \Twig_Environment(new \Twig_Loader_String())));
 
         $builder
             ->from('\\NeuroSYS\\DoctrineDatatables\\Tests\\Entity\\Feature', 'f')
@@ -221,7 +221,7 @@ class BuilderTest extends BaseTestCase
     public function testOneToManyHydrating()
     {
         $request  = $this->createSearchRequest(array('sSortDir_0' => 'desc', 'iSortCol_0' => 1), array('name', 'features'), array('', '1,2'));
-        $builder  = new TableBuilder($this->_em, $request, $this->registry, new TwigRenderer(new \Twig_Loader_String()));
+        $builder  = new TableBuilder($this->_em, $request, $this->registry, new TwigRenderer(new \Twig_Environment(new \Twig_Loader_String())));
 
         $builder
             ->from('\\NeuroSYS\\DoctrineDatatables\\Tests\\Entity\\Product', 'p')
