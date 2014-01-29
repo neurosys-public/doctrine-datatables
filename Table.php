@@ -310,7 +310,7 @@ class Table extends Entity
         $rootEntityIdentifier = 'id'; // FIXME: fetch it from Metadata
 
         $qb = clone $this->getQueryBuilder();
-        $qb->select('COUNT(' . $this->getAlias() . '.' . $rootEntityIdentifier . ')');
+        $qb->select('COUNT(DISTINCT ' . $this->getAlias() . '.' . $rootEntityIdentifier . ')');
         $this
             ->addFrom($qb)
             ->addJoin($qb)
