@@ -187,9 +187,14 @@ class TableBuilder
             }
             foreach ($select as $key => $value) {
                 if (is_numeric($key)) {
-                    list($parentAlias, $fieldName) = explode('.', trim($value));
-                    if (!isset($select[trim($parentAlias)])) {
-                        $select[trim($parentAlias)] = array();
+                    if (strpos(strtolower($value), ' as ') === false) { // check for non entity field
+                        list($parentAlias, $fieldName) = explode('.', trim($value));
+                        if (!isset($select[trim($parentAlias)])) {
+                            $select[trim($parentAlias)] = array();
+                        }
+                    } else {
+                        $parentAlias = '';
+                        $fieldName   = $value;
                     }
                     $select[trim($parentAlias)][] = $fieldName;
                     unset($select[$key]);

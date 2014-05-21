@@ -225,7 +225,10 @@ abstract class AbstractField
                 $dir = $this->getTable()->getRequest()->get('sSortDir', $i);
                 foreach ($this->getSelect() as $entityAlias => $fields) {
                     foreach ($fields as $field) {
-                        $qb->addOrderBy($entityAlias . '.' . $field, $dir == 'asc' ? 'asc' : 'desc');
+                        if (strpos(strtolower($field), ' as ') !== false) {
+                            list(, $field) = preg_split('/ as /i', $field);
+                        }
+                        $qb->addOrderBy(($entityAlias ? $entityAlias . '.' : '') . $field, $dir == 'asc' ? 'asc' : 'desc');
                     }
                 }
             }

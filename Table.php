@@ -60,6 +60,8 @@ class Table extends Entity
      */
     private $entities = array();
 
+    private $basePropertyPath;
+
     /**
      * Constructor
      *
@@ -221,7 +223,7 @@ class Table extends Entity
 
         $results = array();
         foreach ($this->getPrimaryKeys() as $key) {
-            $results[$key] = $this->getValue($values, $key, $accessor);
+            $results[$key] = $this->getValue($values, ($this->basePropertyPath ? $this->basePropertyPath . '.' : '') . $key, $accessor);
         }
         foreach ($this->getFields() as $name => $field) {
 
@@ -233,7 +235,7 @@ class Table extends Entity
                 if (count($selectPaths) == 1) {
                     try {
                         foreach ($field->getSelectPaths() as $selectPath) {
-                            $value[] = $this->getValue($values, implode('.', $selectPath), $accessor);
+                            $value[] = $this->getValue($values, ($this->basePropertyPath ? $this->basePropertyPath . '.' : '') . implode('.', $selectPath), $accessor);
                         }
                     } catch (\Exception $ex) {
                         $value = $values;
@@ -266,6 +268,16 @@ class Table extends Entity
         return $this;
     }
 
+    protected function addFilterJoin(QueryBuilder $qb)
+    {
+        foreach ($this->entities as $entity) {
+            if ($entity != $this) {
+                $qb->leftJoin($entity->getFilterName(), $entity->getFilterAlias());
+            }
+        }
+        return $this;
+    }
+
     /**
      * @return array Field path
      */
@@ -277,9 +289,9 @@ class Table extends Entity
 
     protected function getValue($object, $path, $accessor)
     {
-        if (is_array($object)) {
+        /*if (is_array($object)) {
             $path = '['.str_replace('.', '][', $path).']';
-        }
+        }*/
         return $accessor->getValue($object, $path);
     }
 
@@ -402,9 +414,13 @@ class Table extends Entity
             if (!is_array($names)) {
                 $names = array($names);
             }
-            array_unshift($names, 'id');
-            $qb->addSelect('partial ' . $alias . '.{' . implode(',', array_unique($names)) . '}');
-            //$qb->addSelect($alias);
+            if (empty($alias)) {
+                $qb->addSelect($names);
+                $this->basePropertyPath = '[0]'; // dirty fix for custom fields being fetched
+            } else {
+                array_unshift($names, 'id');
+                $qb->addSelect('partial ' . $alias . '.{' . implode(',', array_unique($names)) . '}');
+            }
         }
 
         return $this;
