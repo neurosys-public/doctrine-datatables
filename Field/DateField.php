@@ -3,20 +3,16 @@ namespace NeuroSYS\DoctrineDatatables\Field;
 
 class DateField extends RangeField
 {
-    /**
-     * @var array
-     */
-    protected $options = array(
-        'format' => 'Y-m-d',
-    );
-
-    /**
-     * @param array $values
-     * @return string
-     */
-    public function format(array $values)
+    public function getSearch()
     {
-        $date = new \DateTime($values[$this->getAlias()]);
-        return $date->format($this->options['format']);
+        @list($from, $to) = @explode(',', parent::getSearch());
+
+        // prepare date range
+        return
+            ($from ? date('Y-m-d', strtotime($from)) . ' 00:00:00' : '')
+            . ',' .
+            ($to ? date('Y-m-d', strtotime($to)) . ' 23:59:59' : '')
+            ;
+
     }
 } 

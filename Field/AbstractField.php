@@ -48,11 +48,6 @@ abstract class AbstractField
     protected $template;
 
     /**
-     * @var callback
-     */
-    protected $formatter;
-
-    /**
      * @var array
      */
     protected $options = array();

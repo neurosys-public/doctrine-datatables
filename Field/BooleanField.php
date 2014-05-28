@@ -5,11 +5,6 @@ use Doctrine\ORM\QueryBuilder;
 
 class BooleanField extends ChoiceField
 {
-    public function format($values, $value = null)
-    {
-        return (bool) $value;
-    }
-
     public function filter(QueryBuilder $qb)
     {
         $orx = $qb->expr()->orX();

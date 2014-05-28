@@ -200,9 +200,6 @@ class Entity extends AbstractField
 
     public function format($values, $value = null)
     {
-        if ($this->formatter) {
-            return call_user_func_array($this->formatter, array($value ? $value : $values, $values));
-        }
         $result = array();
         $accessor = new PropertyAccessor();
 

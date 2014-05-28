@@ -51,11 +51,6 @@ class Table extends Entity
     private $renderer;
 
     /**
-     * @var string One of 'array' or 'entity'
-     */
-    private $hydrate = 'entity';
-
-    /**
      * @var Entity[]
      */
     private $entities = array();
@@ -208,7 +203,7 @@ class Table extends Entity
         }
 
         foreach ($results as $i => $result) {
-            $results[$i] = $this->formatResult($result);
+            $results[$i] = $this->formatResult($result, $hydrate);
         }
         return $results;
     }
@@ -217,25 +212,25 @@ class Table extends Entity
      * @param mixed $values
      * @return array
      */
-    public function formatResult($values)
+    public function formatResult($values, $hydration)
     {
         $accessor = PropertyAccess::createPropertyAccessor();
 
         $results = array();
         foreach ($this->getPrimaryKeys() as $key) {
-            $results[$key] = $this->getValue($values, ($this->basePropertyPath ? $this->basePropertyPath . '.' : '') . $key, $accessor);
+            $results[$key] = $this->getValue($values, ($this->basePropertyPath ? $this->basePropertyPath . '.' : '') . $key, $accessor, $hydration);
         }
         foreach ($this->getFields() as $name => $field) {
 
             if ($context = $field->getContext()) {
-                $value = $this->getValue($values, $context, $accessor);
+                $value = $this->getValue($values, $context, $accessor, $hydration);
             } else {
                 $value = array();
                 $selectPaths = $field->getSelectPaths();
                 if (count($selectPaths) == 1) {
                     try {
                         foreach ($field->getSelectPaths() as $selectPath) {
-                            $value[] = $this->getValue($values, ($this->basePropertyPath ? $this->basePropertyPath . '.' : '') . implode('.', $selectPath), $accessor);
+                            $value[] = $this->getValue($values, ($this->basePropertyPath ? $this->basePropertyPath . '.' : '') . implode('.', $selectPath), $accessor, $hydration);
                         }
                     } catch (\Exception $ex) {
                         $value = $values;
@@ -287,11 +282,11 @@ class Table extends Entity
         return array();
     }
 
-    protected function getValue($object, $path, $accessor)
+    protected function getValue($object, $path, $accessor, $hydration)
     {
-        /*if (is_array($object)) {
+        if ($hydration == self::HYDRATE_ARRAY) {
             $path = '['.str_replace('.', '][', $path).']';
-        }*/
+        }
         return $accessor->getValue($object, $path);
     }
 
@@ -354,7 +349,7 @@ class Table extends Entity
     {
         return array(
             'sEcho'                => $this->request->get('sEcho'),
-            'aaData'               => $this->getData($this->hydrate),
+            'aaData'               => $this->getData(self::HYDRATE_ARRAY),
             "iTotalRecords"        => $this->getCountAllResults(),
             "iTotalDisplayRecords" => $this->getCountFilteredResults()
         );
