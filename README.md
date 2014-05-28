@@ -43,7 +43,7 @@ $builder
     ;
 
 $response = $builder->getTable()
-    ->getResponseArray()
+    ->getResponseArray('entity') // hydrate entity, defaults to array
     ;
 
 // now you can simply return a response
@@ -56,8 +56,9 @@ Composed fields example:
 ```php
 $builder
     ->from('Foo\Bar\Entity\Sample', 's')
-    ->add('text', 's.name')
-    ->add('text', 's.firstName, s.lastName')
+    ->join('s.user', 'u')
+    ->add('text', 's.name')                          // select and filter by a name field
+    ->add('text', 'u.firstName, u.lastName', 'u.id') // select firstName and lastName but filter by an id field
     ->add('date')
     ;
 ```
@@ -66,7 +67,7 @@ Custom query builder example:
 ```php
 $responseArray = $builder
     ->setQueryBuilder($customQueryBuilder)
-    ->add('text', 's.foo')
+    ->add('text', 's.foo', 's.bar') // select foo field but filter by a bar field
     ->getTable()
     ->getResponseArray();
 ```
@@ -79,6 +80,26 @@ Available field types
  * date
  * boolean
  * choice
+
+Twig field rendering
+--------------------
+Default renderer is PhpRenderer, this can be changed by passing another renderer as 4th argument to the TableBuilder:
+```php
+new TableBuilder($entityManager, $_GET, null, new TwigRenderer($twigEnvironment));
+```
+
+To set field template pass template option:
+```php
+$builder
+    ->add('date', 's.createdAt', null, array(
+        'template' => 'path/to/template.html.twig'
+    ))
+```
+
+In template.html.twig
+```twig
+{{ value | date }}
+```
 
 Warning
 -------
