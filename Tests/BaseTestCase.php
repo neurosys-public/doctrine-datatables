@@ -4,7 +4,6 @@ namespace NeuroSYS\DoctrineDatatables\Tests;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Tools\Setup;
 
-use NeuroSYS\DoctrineDatatables\Field\TextField;
 use NeuroSYS\DoctrineDatatables\FieldRegistry;
 
 class BaseTestCase extends \PHPUnit_Framework_TestCase
@@ -48,17 +47,16 @@ class BaseTestCase extends \PHPUnit_Framework_TestCase
             $request['bSearchable_' . $i] = 'true';
             $request['bSortable_' . $i]   = 'true';
         }
+
         return array_merge($request, $override);
     }
-
 
     /**
      * @return EntityManager
      */
     public static function createTestEntityManager($paths = array())
     {
-        if (!class_exists('PDO') || !in_array('sqlite', \PDO::getAvailableDrivers()))
-        {
+        if (!class_exists('PDO') || !in_array('sqlite', \PDO::getAvailableDrivers())) {
             self::markTestSkipped('This test requires SQLite support in your environment');
         }
         $paths  = array(realpath(__DIR__ . '/Entity'));
@@ -69,6 +67,7 @@ class BaseTestCase extends \PHPUnit_Framework_TestCase
             'password' => '',
             'dbname'   => 'neurosys'
         );
+
         return EntityManager::create($params, $config);
     }
 
@@ -123,4 +122,4 @@ class BaseTestCase extends \PHPUnit_Framework_TestCase
         $em->flush();
     }
 
-} 
+}

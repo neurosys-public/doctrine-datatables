@@ -1,13 +1,5 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: b.pasinski
- * Date: 26.11.13
- * Time: 11:16
- */
-
 namespace NeuroSYS\DoctrineDatatables\Field;
-
 
 use Doctrine\ORM\QueryBuilder;
 
@@ -32,4 +24,4 @@ class EmptyField extends AbstractField
     {
 
     }
-} 
+}

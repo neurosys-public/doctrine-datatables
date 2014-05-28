@@ -60,8 +60,8 @@ class TableBuilder
     }
 
     /**
-     * @param string $className Root entity class name
-     * @param string $alias     Alias of root entity
+     * @param  string $className Root entity class name
+     * @param  string $alias     Alias of root entity
      * @return $this
      */
     public function from($className, $alias)
@@ -80,7 +80,7 @@ class TableBuilder
     }
 
     /**
-     * @param QueryBuilder $qb QueryBuilder instance
+     * @param  QueryBuilder $qb QueryBuilder instance
      * @throws \Exception
      */
     public function setQueryBuilder(QueryBuilder $qb)
@@ -102,7 +102,7 @@ class TableBuilder
     {
         if (null != $this->index) {
             return $this->index;
-        } else if (null !== $this->table->getIndex()) {
+        } elseif (null !== $this->table->getIndex()) {
             return $this->getTable()->getIndex();
         } else {
             return count($this->getTable()->getFields());
@@ -151,7 +151,7 @@ class TableBuilder
 
         list($parentAlias, $name) = explode('.', $fullName);
         $parent = $this->getTable()->getEntity($parentAlias);
-        if (!$parent){
+        if (!$parent) {
             throw new \Exception("Parent entity not found for " . $fullName);
         }
         $parent->join($name, $alias);
@@ -159,10 +159,9 @@ class TableBuilder
         return $this;
     }
 
-
     /**
-     * @param string $name Name of field (supported dot notation for relations)
-     * @param string $type Type of field
+     * @param  string $name Name of field (supported dot notation for relations)
+     * @param  string $type Type of field
      * @return $this
      */
     public function add($type, $select = null, $filter = true, $options = array())

@@ -5,7 +5,6 @@ use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\Query\Expr;
 use Doctrine\ORM\QueryBuilder;
 use NeuroSYS\DoctrineDatatables\Table;
-use Symfony\Component\Finder\Exception\OperationNotPermitedException;
 use Symfony\Component\PropertyAccess\PropertyAccessor;
 
 class Entity extends AbstractField
@@ -73,9 +72,9 @@ class Entity extends AbstractField
             $path = $this->getParent()->getPath();
         }
         $path[] = $this->getName();
+
         return $path;
     }
-
 
     public function __construct(Table $table, $name, $alias, array $options = array())
     {
@@ -112,7 +111,7 @@ class Entity extends AbstractField
     }
 
     /**
-     * @param AbstractField $field
+     * @param  AbstractField $field
      * @return $this
      */
     public function setField($name, AbstractField $field)
@@ -143,7 +142,7 @@ class Entity extends AbstractField
     }
 
     /**
-     * @param QueryBuilder $qb
+     * @param  QueryBuilder $qb
      * @return self
      */
     public function select(QueryBuilder $qb)
@@ -156,6 +155,7 @@ class Entity extends AbstractField
         if (!isset($this->relations[$name])) {
             if ($child = $this->getTable()->getEntity($alias)) {
                 $this->relations[$name] = $child;
+
                 return $child;
             } else {
                 $child = new self($this->getTable(), $name, $alias);
@@ -163,6 +163,7 @@ class Entity extends AbstractField
                 $this->relations[$name] =  $child;
             }
         }
+
         return $this->relations[$name];
     }
 
@@ -170,8 +171,10 @@ class Entity extends AbstractField
     {
         if ($this->getParent()) {
             $class = $this->getParent()->getClassName();
+
             return $this->getTable()->getManager()->getClassMetadata($class)->getAssociationTargetClass($this->getName());
         }
+
         return $this->getTable()->getManager()->getClassMetadata($this->getName());
     }
 
@@ -191,10 +194,12 @@ class Entity extends AbstractField
         foreach ($joins as $join) {
             foreach ($join as $j) {
                 if ($j->getAlias() == $this->getAlias()) { // already joined
+
                     return true;
                 }
             }
         }
+
         return false;
     }
 
@@ -208,8 +213,10 @@ class Entity extends AbstractField
             if (is_array($value)) {
                 $accessPath = '['.$accessPath.']';
             }
+
             return $result[$name] = $field->format($value, $accessor->getValue($value, $accessPath));
         }
+
         return $result;
     }
 
@@ -219,11 +226,12 @@ class Entity extends AbstractField
         foreach ($this->getFields() as $field) {
             $select = array_merge_recursive($select, $field->getSelect());
         }
+
         return $select;
     }
 
     /**
-     * @param QueryBuilder $qb
+     * @param  QueryBuilder $qb
      * @return Expr
      */
     public function filter(QueryBuilder $qb)
@@ -237,6 +245,7 @@ class Entity extends AbstractField
         if ($orx->count() > 0) {
             $qb->andWhere($orx);
         }
+
         return $orx;
     }
 }

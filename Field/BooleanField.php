@@ -15,6 +15,7 @@ class BooleanField extends ChoiceField
 
             $orx->add($qb->expr()->eq($field, ':'.$var));
         }
+
         return $orx;
     }
-} 
+}

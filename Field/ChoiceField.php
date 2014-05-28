@@ -1,7 +1,6 @@
 <?php
 namespace NeuroSYS\DoctrineDatatables\Field;
 
-
 use Doctrine\ORM\QueryBuilder;
 
 class ChoiceField extends AbstractField
@@ -16,7 +15,8 @@ class ChoiceField extends AbstractField
                 $qb->expr()->in($field, $values)
             );
         }
+
         return $orx;
     }
 
-} 
+}

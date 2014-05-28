@@ -1,15 +1,9 @@
 <?php
 namespace NeuroSYS\DoctrineDatatables\Tests;
 
-use Doctrine\Common\EventManager;
-use Doctrine\DBAL\Portability\Connection;
-use Doctrine\ORM\Configuration;
-use Doctrine\ORM\EntityManager;
 use NeuroSYS\DoctrineDatatables\Renderer\TwigRenderer;
-use NeuroSYS\DoctrineDatatables\Table;
 use NeuroSYS\DoctrineDatatables\TableBuilder;
 use NeuroSYS\DoctrineDatatables\Field\Entity;
-use NeuroSYS\DoctrineDatatables\FieldBuilder;
 
 class BuilderTest extends BaseTestCase
 {
@@ -27,7 +21,6 @@ class BuilderTest extends BaseTestCase
 
         //echo $builder->getTable()->getResultQueryBuilder()->getQuery()->getDQL();
         //$data = $builder->getTable()->getResultQueryBuilder()->getQuery()->getArrayResult();
-
 
         $response = $builder->getTable()
             ->getResponseArray();

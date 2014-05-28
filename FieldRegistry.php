@@ -30,7 +30,7 @@ class FieldRegistry
     /**
      * @param $type
      * @param $name
-     * @param array $options
+     * @param  array      $options
      * @return Field
      * @throws \Exception
      */
@@ -58,7 +58,6 @@ class FieldRegistry
                 //$field->setPath($path);
             //}
 
-
             //$parent = $field;
         //}
 
@@ -79,4 +78,4 @@ class FieldRegistry
         return $this;
     }
 
-} 
+}

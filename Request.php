@@ -15,7 +15,7 @@ class Request
      *
      * @param $name
      * @param $index
-     * @param bool $default
+     * @param  bool  $default
      * @return mixed
      */
     public function get($name, $index = null, $default = null)
@@ -24,6 +24,7 @@ class Request
         if (isset($this->request[$name])) {
             return $this->request[$name];
         }
+
         return $default;
     }
 
@@ -31,4 +32,4 @@ class Request
     {
         return $this->request;
     }
-} 
+}

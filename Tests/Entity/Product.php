@@ -8,7 +8,6 @@ use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\GeneratedValue;
 use Doctrine\ORM\Mapping\OneToMany;
-use Doctrine\ORM\Mapping\JoinColumn;
 
 /**
  * @Entity
@@ -62,6 +61,7 @@ class Product
     public function setId($id)
     {
         $this->id = $id;
+
         return $this;
     }
 
@@ -73,6 +73,7 @@ class Product
     public function setName($name)
     {
         $this->name = $name;
+
         return $this;
     }
 
@@ -84,6 +85,7 @@ class Product
     public function setPrice($price)
     {
         $this->price = $price;
+
         return $this;
     }
 
@@ -95,6 +97,7 @@ class Product
     public function setDescription($description)
     {
         $this->description = $description;
+
         return $this;
     }
 
@@ -106,6 +109,7 @@ class Product
     public function setFeatures($features)
     {
         $this->features = $features;
+
         return $this;
     }
 
@@ -117,6 +121,7 @@ class Product
     public function setEnabled($enabled)
     {
         $this->enabled = $enabled;
+
         return $this;
     }
 

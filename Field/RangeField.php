@@ -24,7 +24,8 @@ abstract class RangeField extends TextField
             );
             $qb->setParameter('to_'.$this->getIndex(), $to);
         }
+
         return $expr;
     }
 
-} 
+}

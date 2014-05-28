@@ -130,7 +130,7 @@ abstract class AbstractField
     }
 
     /**
-     * @param QueryBuilder $qb
+     * @param  QueryBuilder $qb
      * @return self
      */
     public function filter(QueryBuilder $qb)
@@ -143,6 +143,7 @@ abstract class AbstractField
                 $qb->expr()->like($field, ':' . $var)
             );
         }
+
         return $orx;
     }
 
@@ -181,6 +182,7 @@ abstract class AbstractField
                 $paths[] = $path;
             }
         }
+
         return $paths;
     }
 
@@ -210,7 +212,7 @@ abstract class AbstractField
     }
 
     /**
-     * @param QueryBuilder $qb
+     * @param  QueryBuilder $qb
      * @return $this
      */
     public function order(QueryBuilder $qb)
@@ -228,6 +230,7 @@ abstract class AbstractField
                 }
             }
         }
+
         return $this;
     }
 
@@ -236,6 +239,7 @@ abstract class AbstractField
         if ($this->template) {
             return $this->getTable()->getRenderer()->render($this->template, array('values' => $values, 'value' => $value, 'field' => $this));
         }
+
         return $value;
     }
 

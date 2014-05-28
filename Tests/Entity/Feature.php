@@ -10,7 +10,6 @@ use Doctrine\ORM\Mapping\GeneratedValue;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\JoinColumn;
 
-
 /**
  * @Entity
  * @Table(name="features")
@@ -44,6 +43,7 @@ class Feature
     public function setId($id)
     {
         $this->id = $id;
+
         return $this;
     }
 
@@ -55,6 +55,7 @@ class Feature
     public function setName($name)
     {
         $this->name = $name;
+
         return $this;
     }
 
@@ -66,6 +67,7 @@ class Feature
     public function setProduct($product)
     {
         $this->product = $product;
+
         return $this;
     }
 
