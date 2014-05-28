@@ -345,11 +345,11 @@ class Table extends Entity
         return (int) $qb->getQuery()->getSingleScalarResult();
     }
 
-    public function getResponseArray()
+    public function getResponseArray($hydration = self::HYDRATE_ARRAY)
     {
         return array(
             'sEcho'                => $this->request->get('sEcho'),
-            'aaData'               => $this->getData(self::HYDRATE_ARRAY),
+            'aaData'               => $this->getData($hydration),
             "iTotalRecords"        => $this->getCountAllResults(),
             "iTotalDisplayRecords" => $this->getCountFilteredResults()
         );
