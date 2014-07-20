@@ -7,15 +7,14 @@ class NumberField extends RangeField
 {
     public function filter(QueryBuilder $qb)
     {
-        if (strpos($this->getSearch(),',') === false) {
-            $search = $this->getSearch();
-            $expr = $qb->expr()->andX();
-            list ($searchField,) = $this->getSearchFields();
-            if ($search) {
+        if (strpos($this->getSearch(), ',') === false) {
+            $expr = $qb->expr()->orX();
+            foreach ($this->getSearchFields() as $i => $field) {
+                $var = preg_replace('/[^a-z0-9]*/i', '', $field) . '_' . $i;
                 $expr->add(
-                    $qb->expr()->eq($searchField, ':from_'.$this->getIndex())
+                    $qb->expr()->eq($field, ':'.$var)
                 );
-                $qb->setParameter('from_'.$this->getIndex(), $search);
+                $qb->setParameter($var, $this->getSearch());
             }
         } else {
             $expr = parent::filter($qb);
