@@ -143,6 +143,25 @@ class TableBuilder
 
     public function join($fullName, $alias)
     {
+        return $this->leftJoin($fullName, $alias);
+    }
+
+    public function leftJoin($fullName, $alias)
+    {
+        $this->_join($fullName, $alias, 'LEFT');
+
+        return $this;
+    }
+
+    public function innerJoin($fullName, $alias)
+    {
+        $this->_join($fullName, $alias, 'INNER');
+
+        return $this;
+    }
+
+    private function _join($fullName, $alias, $type)
+    {
         if (null !== $this->table->getIndex()) {
             $index = $this->getTable()->getIndex();
         } else {
@@ -154,7 +173,7 @@ class TableBuilder
         if (!$parent) {
             throw new \Exception("Parent entity not found for " . $fullName);
         }
-        $parent->join($name, $alias);
+        $parent->join($name, $alias, $type);
 
         return $this;
     }
