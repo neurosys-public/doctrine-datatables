@@ -257,7 +257,14 @@ class Table extends Entity
     {
         foreach ($this->entities as $entity) {
             if ($entity != $this) {
-                $qb->leftJoin($entity->getFullName(), $entity->getAlias());
+                switch ($entity->getJoinType()) {
+                    case 'LEFT':
+                        $qb->leftJoin($entity->getFullName(), $entity->getAlias());
+                        break;
+                    case 'INNER':
+                        $qb->innerJoin($entity->getFullName(), $entity->getAlias());
+                        break;
+                }
             }
         }
         return $this;

@@ -36,6 +36,11 @@ class Entity extends AbstractField
      */
     protected $relations = array();
 
+    /**
+     * @var string Join type
+     */
+    protected $joinType;
+
     public static function generateAlias($name)
     {
         if (!$name) {
@@ -60,6 +65,24 @@ class Entity extends AbstractField
         $this->alias = $alias;
 
         return $this;
+    }
+
+    /**
+     * @param string $joinType
+     */
+    public function setJoinType($joinType)
+    {
+        $this->joinType = $joinType;
+
+        return $this;
+    }
+
+    /**
+     * @return string $joinType
+     */
+    public function getJoinType()
+    {
+        return $this->joinType;
     }
 
     /**
@@ -150,16 +173,18 @@ class Entity extends AbstractField
         $qb->addSelect($this->getAlias());
     }
 
-    public function join($name, $alias)
+    public function join($name, $alias, $type = 'LEFT')
     {
         if (!isset($this->relations[$name])) {
             if ($child = $this->getTable()->getEntity($alias)) {
                 $this->relations[$name] = $child;
+                $child->setJoinType($type);
 
                 return $child;
             } else {
                 $child = new self($this->getTable(), $name, $alias);
                 $child->setParent($this);
+                $child->setJoinType($type);
                 $this->relations[$name] =  $child;
             }
         }
