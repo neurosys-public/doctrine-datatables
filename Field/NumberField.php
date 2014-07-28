@@ -14,7 +14,7 @@ class NumberField extends RangeField
                 $expr->add(
                     $qb->expr()->eq($field, ':'.$var)
                 );
-                $qb->setParameter($var, $this->getSearch());
+                $qb->setParameter($var, (float) $this->getSearch());
             }
         } else {
             $expr = parent::filter($qb);
