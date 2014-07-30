@@ -43,6 +43,11 @@ class Table extends Entity
     /**
      * @var array
      */
+    private $hints;
+
+    /**
+     * @var array
+     */
     private $orders = array();
 
     /**
@@ -154,6 +159,26 @@ class Table extends Entity
     }
 
     /**
+     * @param $name  Hint name
+     * @param $value  Hint value
+     * @return $this
+     */
+    public function setHint($name, $value)
+    {
+        $this->hints[] = array('name' => $name, 'value' => $value);
+
+        return $this;
+    }
+
+    /**
+     *
+     */
+    public function getHints()
+    {
+        return $this->hints;
+    }
+
+    /**
      * @param QueryBuilder $qb
      * @return $this
      */
@@ -196,6 +221,11 @@ class Table extends Entity
     public function getData($hydrate = 'array')
     {
         $query = $this->getResultQueryBuilder()->getQuery();
+
+        foreach ($this->getHints() as $hint) {
+            $query->setHint($hint['name'], $hint['value']);
+        }
+
         if ($hydrate == 'array') {
             $results = $query->getArrayResult();
         } else {
@@ -331,7 +361,13 @@ class Table extends Entity
         ;
         $qb->resetDQLPart('groupBy');
 
-        return (int) $qb->getQuery()->getSingleScalarResult();
+        $query =$qb->getQuery();
+
+        foreach ($this->getHints() as $hint) {
+            $query->setHint($hint['name'], $hint['value']);
+        }
+
+        return (int) $query->getSingleScalarResult();
     }
 
     /**
@@ -349,7 +385,14 @@ class Table extends Entity
             ->addFilter($qb)
         ;
         $qb->resetDQLPart('groupBy');
-        return (int) $qb->getQuery()->getSingleScalarResult();
+
+        $query =$qb->getQuery();
+
+        foreach ($this->getHints() as $hint) {
+            $query->setHint($hint['name'], $hint['value']);
+        }
+
+        return (int) $query->getSingleScalarResult();
     }
 
     public function getResponseArray($hydration = self::HYDRATE_ARRAY)
