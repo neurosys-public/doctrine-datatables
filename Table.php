@@ -83,6 +83,7 @@ class Table extends Entity
         $this->setRenderer($renderer);
         $this->setMaxResults($request->get('iDisplayLength'));
         $this->setFirstResult($request->get('iDisplayStart'));
+        $this->hints = array();
     }
 
     public function addEntity(Entity $entity)
