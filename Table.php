@@ -43,6 +43,11 @@ class Table extends Entity
     /**
      * @var array
      */
+    private $hints;
+
+    /**
+     * @var array
+     */
     private $orders = array();
 
     /**
@@ -78,6 +83,7 @@ class Table extends Entity
         $this->setRenderer($renderer);
         $this->setMaxResults($request->get('iDisplayLength'));
         $this->setFirstResult($request->get('iDisplayStart'));
+        $this->hints = array();
     }
 
     public function addEntity(Entity $entity)
@@ -154,6 +160,26 @@ class Table extends Entity
     }
 
     /**
+     * @param $name  Hint name
+     * @param $value  Hint value
+     * @return $this
+     */
+    public function setHint($name, $value)
+    {
+        $this->hints[$name] = $value;
+
+        return $this;
+    }
+
+    /**
+     *
+     */
+    public function getHints()
+    {
+        return $this->hints;
+    }
+
+    /**
      * @param QueryBuilder $qb
      * @return $this
      */
@@ -196,6 +222,11 @@ class Table extends Entity
     public function getData($hydrate = 'array')
     {
         $query = $this->getResultQueryBuilder()->getQuery();
+
+        foreach ($this->getHints() as $name => $value) {
+            $query->setHint($name, $value);
+        }
+
         if ($hydrate == 'array') {
             $results = $query->getArrayResult();
         } else {
@@ -331,7 +362,13 @@ class Table extends Entity
         ;
         $qb->resetDQLPart('groupBy');
 
-        return (int) $qb->getQuery()->getSingleScalarResult();
+        $query =$qb->getQuery();
+
+        foreach ($this->getHints() as $hint) {
+            $query->setHint($hint['name'], $hint['value']);
+        }
+
+        return (int) $query->getSingleScalarResult();
     }
 
     /**
@@ -349,7 +386,14 @@ class Table extends Entity
             ->addFilter($qb)
         ;
         $qb->resetDQLPart('groupBy');
-        return (int) $qb->getQuery()->getSingleScalarResult();
+
+        $query =$qb->getQuery();
+
+        foreach ($this->getHints() as $hint) {
+            $query->setHint($hint['name'], $hint['value']);
+        }
+
+        return (int) $query->getSingleScalarResult();
     }
 
     public function getResponseArray($hydration = self::HYDRATE_ARRAY)

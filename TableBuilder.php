@@ -179,6 +179,18 @@ class TableBuilder
     }
 
     /**
+     * @param $name  Hint name
+     * @param $value  Hint value
+     * @return $this
+     */
+    public function setHint($name, $value)
+    {
+        $this->getTable()->setHint($name, $value);
+
+        return $this;
+    }
+
+    /**
      * @param  string $name Name of field (supported dot notation for relations)
      * @param  string $type Type of field
      * @return $this
