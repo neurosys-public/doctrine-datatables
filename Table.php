@@ -166,7 +166,7 @@ class Table extends Entity
      */
     public function setHint($name, $value)
     {
-        $this->hints[] = array('name' => $name, 'value' => $value);
+        $this->hints[$name] = $value;
 
         return $this;
     }
@@ -223,8 +223,8 @@ class Table extends Entity
     {
         $query = $this->getResultQueryBuilder()->getQuery();
 
-        foreach ($this->getHints() as $hint) {
-            $query->setHint($hint['name'], $hint['value']);
+        foreach ($this->getHints() as $name => $value) {
+            $query->setHint($name, $value);
         }
 
         if ($hydrate == 'array') {
