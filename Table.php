@@ -336,12 +336,12 @@ class Table extends Entity
         $qb = clone $this->getQueryBuilder();
 
         $this
-            ->select($qb)
             ->addFrom($qb)
             ->addJoin($qb)
             ->addFilter($qb)
             ->limit($qb)
             ->offset($qb)
+            ->select($qb)
             ->addOrder($qb);
 
         return $qb;
@@ -464,7 +464,7 @@ class Table extends Entity
                 $qb->addSelect($names);
                 $this->basePropertyPath = '[0]'; // dirty fix for custom fields being fetched
             } else {
-                array_unshift($names, 'id');
+                // array_unshift($names, 'id');
                 $qb->addSelect('partial ' . $alias . '.{' . implode(',', array_unique($names)) . '}');
             }
         }
