@@ -63,9 +63,13 @@ class Table extends Entity
     private $basePropertyPath;
 
     /**
-     * Constructor
+     * @param Table                  $name
+     * @param array                  $alias
+     * @param EntityManager          $em
+     * @param Request                $request
+     * @param RendererInterface|null $renderer
      *
-     * @param EntityManager $em
+     * @throws \Exception
      */
     public function __construct($name, $alias, EntityManager $em, Request $request, RendererInterface $renderer = null)
     {
@@ -352,7 +356,7 @@ class Table extends Entity
      */
     public function getCountAllResults()
     {
-        $rootEntityIdentifier = 'id'; // FIXME: fetch it from Metadata
+        $rootEntityIdentifier = $this->getPrimaryKeys()[0]; // FIXME: add support for compound primary keys
 
         $qb = clone $this->getQueryBuilder();
         $qb->select('COUNT(DISTINCT ' . $this->getAlias() . '.' . $rootEntityIdentifier . ')');
@@ -376,7 +380,7 @@ class Table extends Entity
      */
     public function getCountFilteredResults()
     {
-        $rootEntityIdentifier = 'id'; // FIXME: fetch it from Metadata
+        $rootEntityIdentifier = $this->getPrimaryKeys()[0]; // FIXME: add support for compound primary keys
 
         $qb = clone $this->getQueryBuilder();
         $qb->select('COUNT(DISTINCT ' . $this->getAlias() . '.' . $rootEntityIdentifier . ')');
@@ -464,7 +468,7 @@ class Table extends Entity
                 $qb->addSelect($names);
                 $this->basePropertyPath = '[0]'; // dirty fix for custom fields being fetched
             } else {
-                array_unshift($names, 'id');
+                array_unshift($names, $this->getEntity($alias)->getPrimaryKeys()[0]);
                 $qb->addSelect('partial ' . $alias . '.{' . implode(',', array_unique($names)) . '}');
             }
         }

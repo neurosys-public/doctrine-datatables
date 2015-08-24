@@ -99,6 +99,14 @@ class Entity extends AbstractField
         return $path;
     }
 
+    /**
+     * @param Table  $table
+     * @param array  $name
+     * @param string $alias
+     * @param array  $options
+     *
+     * @throws \Exception
+     */
     public function __construct(Table $table, $name, $alias, array $options = array())
     {
         if (empty($name) || empty($alias)) {
@@ -200,14 +208,15 @@ class Entity extends AbstractField
             return $this->getTable()->getManager()->getClassMetadata($class)->getAssociationTargetClass($this->getName());
         }
 
-        return $this->getTable()->getManager()->getClassMetadata($this->getName());
+        return $this->getTable()->getManager()->getClassMetadata($this->getName())->getName();
     }
 
+    /**
+     * @return array Entity primary keys
+     */
     public function getPrimaryKeys()
     {
-        //$metadata = $this->getTable()->getManager()->getClassMetadata($this->getClassName());
-        //return $metadata->getIdentifierFieldNames();
-        return array('id'); // FIXME
+        return $this->getTable()->getManager()->getMetadataFactory()->getMetadataFor($this->getClassName())->getIdentifier();
     }
 
     public function isJoined(QueryBuilder $qb)

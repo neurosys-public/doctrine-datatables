@@ -18,10 +18,10 @@ class Product
 
     /**
      * @Id
-     * @Column(type="integer")
+     * @Column(name="id", type="integer")
      * @GeneratedValue(strategy="AUTO")
      */
-    protected $id;
+    protected $productId;
 
     /**
      * @Column(type="string", length=100)

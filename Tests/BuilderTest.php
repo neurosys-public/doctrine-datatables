@@ -179,7 +179,7 @@ class BuilderTest extends BaseTestCase
             ->getData();
 
         // fetch real results
-        $expected = $this->_em->getConnection()->query("SELECT p.id, p.name, p.enabled FROM products p WHERE enabled = 1 ORDER BY p.name ASC")->fetchAll();
+        $expected = $this->_em->getConnection()->query("SELECT p.id as productId, p.name, p.enabled FROM products p WHERE enabled = 1 ORDER BY p.name ASC")->fetchAll();
         $this->assertEquals($expected, $results);
     }
     public function testRenderer()
