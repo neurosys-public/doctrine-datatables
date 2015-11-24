@@ -294,12 +294,15 @@ class Table extends Entity
             if ($entity != $this) {
                 switch ($entity->getJoinType()) {
                     case 'LEFT':
-                        $qb->leftJoin($entity->getFullName(), $entity->getAlias());
+                        $method = "leftJoin";
                         break;
                     case 'INNER':
-                        $qb->innerJoin($entity->getFullName(), $entity->getAlias());
+                        $method = "innerJoin";
                         break;
+                    default:
+                        throw new \Exception("Invalid join type: " . $entity->getJoinType());
                 }
+                $qb->$method($entity->getFullName(), $entity->getAlias(), $entity->getJoinConditionType(), $entity->getJoinCondition());
             }
         }
         return $this;

@@ -141,39 +141,33 @@ class TableBuilder
         $this->table = $table;
     }
 
-    public function join($fullName, $alias)
+    public function join($fullName, $alias, $conditionType = null, $condition = null)
     {
-        return $this->leftJoin($fullName, $alias);
+        return $this->leftJoin($fullName, $alias, $conditionType, $condition);
     }
 
-    public function leftJoin($fullName, $alias)
+    public function leftJoin($fullName, $alias, $conditionType = null, $condition = null)
     {
-        $this->_join($fullName, $alias, 'LEFT');
+        $this->_join($fullName, $alias, 'LEFT', $conditionType, $condition);
 
         return $this;
     }
 
-    public function innerJoin($fullName, $alias)
+    public function innerJoin($fullName, $alias, $conditionType = null, $condition = null)
     {
-        $this->_join($fullName, $alias, 'INNER');
+        $this->_join($fullName, $alias, 'INNER', $conditionType, $condition);
 
         return $this;
     }
 
-    private function _join($fullName, $alias, $type)
+    private function _join($fullName, $alias, $type, $conditionType = null, $condition = null)
     {
-        if (null !== $this->table->getIndex()) {
-            $index = $this->getTable()->getIndex();
-        } else {
-            $index = count($this->getTable()->getFields());
-        }
-
         list($parentAlias, $name) = explode('.', $fullName);
         $parent = $this->getTable()->getEntity($parentAlias);
         if (!$parent) {
             throw new \Exception("Parent entity not found for " . $fullName);
         }
-        $parent->join($name, $alias, $type);
+        $parent->join($name, $alias, $type, $conditionType, $condition);
 
         return $this;
     }
