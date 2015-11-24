@@ -41,6 +41,20 @@ class Entity extends AbstractField
      */
     protected $joinType;
 
+    /**
+     * DQL join condition type
+     *
+     * @var string|null
+     */
+    protected $joinConditionType;
+
+    /**
+     * DQL join condition
+     *
+     * @var string|null
+     */
+    protected $joinCondition;
+
     public static function generateAlias($name)
     {
         if (!$name) {
@@ -83,6 +97,54 @@ class Entity extends AbstractField
     public function getJoinType()
     {
         return $this->joinType;
+    }
+
+    /**
+     * @return array
+     */
+    public function getOptions()
+    {
+        return $this->options;
+    }
+
+    /**
+     * @param array $options
+     */
+    public function setOptions($options)
+    {
+        $this->options = $options;
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getJoinCondition()
+    {
+        return $this->joinCondition;
+    }
+
+    /**
+     * @param null|string $joinCondition
+     */
+    public function setJoinCondition($joinCondition)
+    {
+        $this->joinCondition = $joinCondition;
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getJoinConditionType()
+    {
+        return $this->joinConditionType;
+    }
+
+    /**
+     * @param null|string $joinConditionType
+     */
+    public function setJoinConditionType($joinConditionType)
+    {
+        $this->joinConditionType = $joinConditionType;
     }
 
     /**
@@ -181,20 +243,19 @@ class Entity extends AbstractField
         $qb->addSelect($this->getAlias());
     }
 
-    public function join($name, $alias, $type = 'LEFT')
+    public function join($name, $alias, $type = 'LEFT', $conditionType = null, $condition = null)
     {
         if (!isset($this->relations[$name])) {
-            if ($child = $this->getTable()->getEntity($alias)) {
-                $this->relations[$name] = $child;
-                $child->setJoinType($type);
-
-                return $child;
-            } else {
+            $child = $this->getTable()->getEntity($alias);
+            if (!$child) {
                 $child = new self($this->getTable(), $name, $alias);
                 $child->setParent($this);
-                $child->setJoinType($type);
-                $this->relations[$name] =  $child;
             }
+            $child->setJoinType($type);
+            $child->setJoinConditionType($conditionType);
+            $child->setJoinCondition($condition);
+
+            return $this->relations[$name] = $child;
         }
 
         return $this->relations[$name];

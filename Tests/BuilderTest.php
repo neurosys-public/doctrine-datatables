@@ -232,4 +232,25 @@ class BuilderTest extends BaseTestCase
         $this->assertNotEmpty($results);
         $this->assertEquals('SolidState drive,CPU I7 Generation,', $results[0]['features']);
     }
+
+    public function testJoinCondition()
+    {
+        $builder  = new TableBuilder($this->_em, []);
+
+        $builder
+            ->from('\\NeuroSYS\\DoctrineDatatables\\Tests\\Entity\\Product', 'p')
+            ->join("p.features", "f", "WITH", "f.name IS NOT NULL")
+            ->add("text", "p.name")
+            ->add( "choice", "f.name", "f.id", array(
+                'template' => '{% for f in values.features %}{{ f.name }},{% endfor %}'
+            ))
+        ;
+        $joins = $builder->getTable()->getResultQueryBuilder()->getDQLPart('join');
+
+        /** @var \Doctrine\ORM\Query\Expr\Join $join */
+        $join  = $joins['p'][0]; // our feature join should be here
+
+        $this->assertEquals('f.name IS NOT NULL', $join->getCondition());
+        $this->assertEquals('WITH', $join->getConditionType());
+    }
 }
