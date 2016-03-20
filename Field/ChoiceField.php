@@ -5,9 +5,14 @@ use Doctrine\ORM\QueryBuilder;
 
 class ChoiceField extends AbstractField
 {
-    public function filter(QueryBuilder $qb)
+    /**
+     * @param QueryBuilder $qb
+     * @param bool|false $global decide is filter or global search
+     * @return \Doctrine\ORM\Query\Expr\Orx
+     */
+    public function filter(QueryBuilder $qb, $global = false)
     {
-        $values = @explode(',', $this->getSearch());
+        $values = @explode(',', $this->getSearch($global));
 
         $orx = $qb->expr()->orX();
         foreach ($this->getSearchFields() as $i => $field) {

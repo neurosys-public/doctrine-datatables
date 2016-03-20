@@ -100,9 +100,19 @@ abstract class AbstractField
         return $this;
     }
 
-    public function getSearch()
+    /**
+     * Get search phrase form request
+     *
+     * @param bool|false $global decide is filter or global search - if true from sSearch var, else sSearch_id var
+     * @return mixed|string
+     */
+    public function getSearch($global = false)
     {
-        return isset($this->search) ? $this->search : $this->getTable()->getRequest()->get('sSearch', $this->getIndex());
+        return isset($this->search) ?
+            $this->search
+            : (!$global) ?
+                $this->getTable()->getRequest()->get('sSearch', $this->getIndex())  //search by column filter
+                : $this->getTable()->getRequest()->get('sSearch'); //search by datatable global search
     }
 
     /**
@@ -123,22 +133,29 @@ abstract class AbstractField
         return isset($this->searchable) ? $this->searchable : (bool) $this->getTable()->getRequest()->get('bSearchable', $this->getIndex());
     }
 
-    public function isSearch()
+    /**
+     * Check if the field is searchable and has search phrase
+     *
+     * @param bool|false $global decide is filter or global search
+     * @return bool
+     */
+    public function isSearch($global = false)
     {
         return $this->isSearchable()
-            && $this->getSearch() != '';
+            && $this->getSearch($global) != '';
     }
 
     /**
-     * @param  QueryBuilder $qb
-     * @return self
+     * @param QueryBuilder $qb
+     * @param bool|false $global decide is filter or global search
+     * @return \Doctrine\ORM\Query\Expr\Orx
      */
-    public function filter(QueryBuilder $qb)
+    public function filter(QueryBuilder $qb, $global = false)
     {
         $orx = $qb->expr()->orX();
         foreach ($this->getSearchFields() as $i => $field) {
-            $var = preg_replace('/[^a-z0-9]*/i', '', $field) . '_' . $i;
-            $qb->setParameter($var, '%'.$this->getSearch().'%');
+            $var = preg_replace('/[^a-z0-9]*/i', '', $field) . '_' . $i . ($global ? 'g' : '');
+            $qb->setParameter($var, '%'.$this->getSearch($global).'%');
             $orx->add(
                 $qb->expr()->like($field, ':' . $var)
             );

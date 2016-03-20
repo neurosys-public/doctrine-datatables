@@ -5,7 +5,12 @@ use Doctrine\ORM\QueryBuilder;
 
 abstract class RangeField extends TextField
 {
-    public function filter(QueryBuilder $qb)
+    /**
+     * @param QueryBuilder $qb
+     * @param bool|false $global decide is filter or global search
+     * @return \Doctrine\ORM\Query\Expr\Andx
+     */
+    public function filter(QueryBuilder $qb, $global = false)
     {
         @list($from, $to) = @explode(',', $this->getSearch());
 
@@ -13,16 +18,18 @@ abstract class RangeField extends TextField
         list ($searchField,) = $this->getSearchFields();
 
         if ($from) {
+            $var = 'from_'.$this->getIndex() . ($global ? 'g' : '');
             $expr->add(
-                $qb->expr()->gte($searchField, ':from_'.$this->getIndex())
+                $qb->expr()->gte($searchField, ':' . $var)
             );
-            $qb->setParameter('from_'.$this->getIndex(), $from);
+            $qb->setParameter($var, $from);
         }
         if ($to) {
+            $var = 'to_'.$this->getIndex() . ($global ? 'g' : '');
             $expr->add(
-                $qb->expr()->lte($searchField, ':to_'.$this->getIndex())
+                $qb->expr()->lte($searchField, ':' . $var)
             );
-            $qb->setParameter('to_'.$this->getIndex(), $to);
+            $qb->setParameter($var, $to);
         }
 
         return $expr;

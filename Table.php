@@ -347,6 +347,7 @@ class Table extends Entity
             ->addFrom($qb)
             ->addJoin($qb)
             ->addFilter($qb)
+            ->addSearch($qb)
             ->limit($qb)
             ->offset($qb)
             ->addOrder($qb);
@@ -391,6 +392,7 @@ class Table extends Entity
             ->addFrom($qb)
             ->addJoin($qb)
             ->addFilter($qb)
+            ->addSearch($qb)
         ;
         $qb->resetDQLPart('groupBy');
 
@@ -517,6 +519,24 @@ class Table extends Entity
     public function getRequest()
     {
         return $this->request;
+    }
+
+    /**
+     * @param QueryBuilder $qb
+     * @return Table
+     */
+    protected function addSearch(QueryBuilder $qb)
+    {
+        $orx = $qb->expr()->orX();
+        foreach ($this->getFields() as $field) {
+            if ($field->isSearch(true)) {
+                $orx->add($field->filter($qb, true));
+            }
+        }
+        if ($orx->count() > 0) {
+            $qb->andWhere($orx);
+        }
+        return $this;
     }
 
     public function __toString()
