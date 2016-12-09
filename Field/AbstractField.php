@@ -138,9 +138,9 @@ abstract class AbstractField
         $orx = $qb->expr()->orX();
         foreach ($this->getSearchFields() as $i => $field) {
             $var = preg_replace('/[^a-z0-9]*/i', '', $field) . '_' . $i;
-            $qb->setParameter($var, '%'.$this->getSearch().'%');
+            $qb->setParameter($var, '%'.strtolower($this->getSearch()).'%');
             $orx->add(
-                $qb->expr()->like($field, ':' . $var)
+                $qb->expr()->like('LOWER('.$field.')', ':' . $var)
             );
         }
 
