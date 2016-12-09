@@ -367,6 +367,7 @@ class Table extends Entity
             ->addFrom($qb)
             ->addJoin($qb)
         ;
+        $qb->resetDQLPart('orderBy');
         $qb->resetDQLPart('groupBy');
 
         $query =$qb->getQuery();
@@ -392,6 +393,7 @@ class Table extends Entity
             ->addJoin($qb)
             ->addFilter($qb)
         ;
+        $qb->resetDQLPart('orderBy');
         $qb->resetDQLPart('groupBy');
 
         $query =$qb->getQuery();
