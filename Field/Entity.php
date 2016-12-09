@@ -326,15 +326,16 @@ class Entity extends AbstractField
     }
 
     /**
-     * @param  QueryBuilder $qb
-     * @return Expr
+     * @param QueryBuilder $qb
+     * @param bool|false $global decide is filter or global search
+     * @return Expr\Orx
      */
-    public function filter(QueryBuilder $qb)
+    public function filter(QueryBuilder $qb, $global = false)
     {
         $orx = $qb->expr()->orX();
         foreach ($this->getFields() as $field) {
-            if ($field->isSearch()) {
-                $orx->add($field->filter($qb));
+            if ($field->isSearch($global)) {
+                $orx->add($field->filter($qb, $global));
             }
         }
         if ($orx->count() > 0) {

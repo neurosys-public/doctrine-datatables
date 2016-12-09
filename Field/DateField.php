@@ -3,9 +3,13 @@ namespace NeuroSYS\DoctrineDatatables\Field;
 
 class DateField extends RangeField
 {
-    public function getSearch()
+    /**
+     * @param bool|false $global decide is filter or global search
+     * @return string
+     */
+    public function getSearch($global = false)
     {
-        @list($from, $to) = @explode(',', parent::getSearch());
+        @list($from, $to) = @explode(',', parent::getSearch($global));
 
         // prepare date range
         return
